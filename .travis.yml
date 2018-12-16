@@ -10,5 +10,6 @@ before_script:
   - dep ensure
   - go get -u github.com/alecthomas/gometalinter
   - gometalinter --install
+  - chmod 755 ./scripts/tools/*
 
 script: ./scripts/tools/runChecks.sh
