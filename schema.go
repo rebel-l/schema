@@ -2,7 +2,7 @@
 package schema
 
 import (
-	"database/sql"
+	"github.com/rebel-l/schema/store"
 
 	"github.com/sirupsen/logrus"
 )
@@ -20,13 +20,14 @@ type Schema struct {
 	PathOfSchemaFiles string
 	Logger            logrus.FieldLogger
 	Command           string
-	DB                *sql.DB // TODO: Replace by Interface
+	mapper            store.SchemaVersionMapper
 }
 
 // New returns a Schema struct
-func New(logger logrus.FieldLogger) Schema {
+func New(logger logrus.FieldLogger, db store.DatabaseConnector) Schema {
 	return Schema{
 		Logger: logger,
+		mapper: store.NewSchemaVersionMapper(db),
 	}
 }
 
