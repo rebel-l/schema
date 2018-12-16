@@ -15,19 +15,25 @@ const (
 	CommandMigrate = "migrate"
 )
 
+// Versioner provides methods to manage the access to log of SQL script executions
+type Versioner interface {
+	Add(entry *store.SchemaVersion) error
+	GetByID(id int64) (*store.SchemaVersion, error)
+}
+
 // Schema provides commands to organize your database schema
 type Schema struct {
 	PathOfSchemaFiles string
 	Logger            logrus.FieldLogger
 	Command           string
-	mapper            store.SchemaVersionMapper
+	versioner         Versioner
 }
 
 // New returns a Schema struct
 func New(logger logrus.FieldLogger, db store.DatabaseConnector) Schema {
 	return Schema{
-		Logger: logger,
-		mapper: store.NewSchemaVersionMapper(db),
+		Logger:    logger,
+		versioner: store.NewSchemaVersionMapper(db),
 	}
 }
 
