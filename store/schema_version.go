@@ -13,7 +13,7 @@ const (
 
 // SchemaVersion represents the version information stored in the database
 type SchemaVersion struct {
-	ID         int32     `db:"id"`
+	ID         int64     `db:"id"`
 	ScriptName string    `db:"script_name"`
 	ExecutedAt time.Time `db:"executed_at"`
 	Status     string    `db:"execution_status"`
