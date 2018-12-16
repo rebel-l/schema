@@ -57,7 +57,7 @@ func (svm SchemaVersionMapper) GetByID(id int64) (*SchemaVersion, error) {
 		return nil, fmt.Errorf("SchemaVersion, get by id: id must be greater than zero")
 	}
 
-	var sv *SchemaVersion
+	sv := &SchemaVersion{}
 	q := `SELECT * from schema_version WHERE id = ?`
 	if err := svm.db.Select(sv, q, id); err != nil {
 		return nil, fmt.Errorf("SchemaVersion, get by id failed: %s", err)
