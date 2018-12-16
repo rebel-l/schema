@@ -1,0 +1,14 @@
+language: go
+
+go:
+    - 1.11.x
+
+before_script:
+  - go version
+  - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+  - dep version
+  - dep ensure
+  - go get -u github.com/alecthomas/gometalinter
+  - gometalinter --install
+
+script: ./scripts/tools/runChecks.sh
