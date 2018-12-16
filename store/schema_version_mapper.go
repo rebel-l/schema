@@ -2,19 +2,17 @@ package store
 
 import (
 	"fmt"
-
-	"github.com/jmoiron/sqlx"
 )
 
 const dateTimeFormat = "2006-01-02T15:04:05Z"
 
 // SchemaVersionMapper is responsible for mapping and storing SchemaVersion struct in database
 type SchemaVersionMapper struct {
-	db *sqlx.DB // TODO: replace by interface
+	db DatabaseConnector
 }
 
 // NewSchemaVersionMapper returns a new SchemaVersionMapper
-func NewSchemaVersionMapper(db *sqlx.DB) SchemaVersionMapper {
+func NewSchemaVersionMapper(db DatabaseConnector) SchemaVersionMapper {
 	return SchemaVersionMapper{db: db}
 }
 
