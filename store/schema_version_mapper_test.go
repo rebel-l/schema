@@ -95,13 +95,9 @@ func TestSchemaVersionMapper_GetByID_Happy(t *testing.T) {
 	mockDb.EXPECT().Select(gomock.Any(), gomock.Any(), id).Return(nil)
 
 	mapper := NewSchemaVersionMapper(mockDb)
-	res, err := mapper.GetByID(id)
+	_, err := mapper.GetByID(id)
 	if err != nil {
 		t.Errorf("no error expected on reading")
-	}
-
-	if res == nil {
-		t.Errorf("returned schema version should not be nil")
 	}
 }
 
@@ -158,5 +154,39 @@ func TestSchemaVersionMapper_GetByID_Unhappy_SelectError(t *testing.T) {
 
 	if res != nil {
 		t.Errorf("returned schema version should be nil on error")
+	}
+}
+
+func TestSchemaVersionMapper_GetAll_Happy(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockDb := mocks.NewMockDatabaseConnector(ctrl)
+	empty := make([]interface{}, 0)
+	mockDb.EXPECT().Select(gomock.Any(), gomock.Any(), gomock.Eq(empty))
+
+	mapper := NewSchemaVersionMapper(mockDb)
+	_, err := mapper.GetAll()
+	if err != nil {
+		t.Errorf("no error expected on getting all entries")
+	}
+}
+
+func TestSchemaVersionMapper_GetAll_Unhappy(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockDb := mocks.NewMockDatabaseConnector(ctrl)
+	empty := make([]interface{}, 0)
+	mockDb.EXPECT().Select(gomock.Any(), gomock.Any(), gomock.Eq(empty)).Return(errors.New("select failed"))
+
+	mapper := NewSchemaVersionMapper(mockDb)
+	res, err := mapper.GetAll()
+	if err == nil {
+		t.Errorf("expected error on reading failure")
+	}
+
+	if res != nil {
+		t.Errorf("returned list of schema versions should be nil on error")
 	}
 }

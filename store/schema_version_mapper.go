@@ -65,3 +65,14 @@ func (svm SchemaVersionMapper) GetByID(id int64) (*SchemaVersion, error) {
 
 	return sv, nil
 }
+
+// GetAll returns all SchemaVersion entries
+func (svm SchemaVersionMapper) GetAll() ([]*SchemaVersion, error) {
+	var versions []*SchemaVersion
+	q := `SELECT * FROM schema_version`
+	if err := svm.db.Select(versions, q); err != nil {
+		return nil, err
+	}
+
+	return versions, nil
+}
