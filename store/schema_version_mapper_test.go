@@ -92,7 +92,7 @@ func TestSchemaVersionMapper_GetByID_Happy(t *testing.T) {
 	id := int64(203)
 
 	mockDb := mocks.NewMockDatabaseConnector(ctrl)
-	mockDb.EXPECT().Select(gomock.Any(), gomock.Any(), id).Return(nil)
+	mockDb.EXPECT().Get(gomock.Any(), gomock.Any(), id).Return(nil)
 
 	mapper := NewSchemaVersionMapper(mockDb)
 	_, err := mapper.GetByID(id)
@@ -144,7 +144,7 @@ func TestSchemaVersionMapper_GetByID_Unhappy_SelectError(t *testing.T) {
 	id := int64(666)
 
 	mockDb := mocks.NewMockDatabaseConnector(ctrl)
-	mockDb.EXPECT().Select(gomock.Any(), gomock.Any(), id).Return(errors.New("select failed"))
+	mockDb.EXPECT().Get(gomock.Any(), gomock.Any(), id).Return(errors.New("select failed"))
 
 	mapper := NewSchemaVersionMapper(mockDb)
 	res, err := mapper.GetByID(id)

@@ -10,4 +10,5 @@ import (
 type DatabaseConnector interface {
 	sqlx.Execer
 	Select(dest interface{}, query string, args ...interface{}) error
+	Get(dest interface{}, query string, args ...interface{}) error
 }

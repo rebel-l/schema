@@ -53,6 +53,25 @@ func (mr *MockDatabaseConnectorMockRecorder) Exec(arg0 interface{}, arg1 ...inte
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exec", reflect.TypeOf((*MockDatabaseConnector)(nil).Exec), varargs...)
 }
 
+// Get mocks base method
+func (m *MockDatabaseConnector) Get(arg0 interface{}, arg1 string, arg2 ...interface{}) error {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Get", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Get indicates an expected call of Get
+func (mr *MockDatabaseConnectorMockRecorder) Get(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockDatabaseConnector)(nil).Get), varargs...)
+}
+
 // Select mocks base method
 func (m *MockDatabaseConnector) Select(arg0 interface{}, arg1 string, arg2 ...interface{}) error {
 	m.ctrl.T.Helper()
