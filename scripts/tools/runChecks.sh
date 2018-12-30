@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+# TODO: add parameters for "short" (linter and test) and "cover & race" (test)
+
 # Execute linter
 echo
 echo -en "\E[40;35m\033[1mExecute linters\033[0m"
@@ -17,7 +20,7 @@ fi
 # Execute tests
 echo -en "\E[40;35m\033[1mExecute tests\033[0m"
 echo
-go test -v github.com/rebel-l/schema github.com/rebel-l/schema/store
+go test -v ./...
 EXITCODE=$?
 if [ $EXITCODE != 0 ]
 then
