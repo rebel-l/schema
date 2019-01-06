@@ -18,5 +18,9 @@ before_script:
   - chmod 755 ./scripts/tools/*
 
 script:
-  - ./scripts/tools/runChecks.sh
+  - gometalinter --config=gometalinter.json
+  - go test -v -cover -race -coverprofile=coverage.txt -covermode=atomic ./...
   - $GOPATH/bin/goveralls -service=travis-ci
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
