@@ -1,12 +1,47 @@
 #!/usr/bin/env bash
 
-# TODO: add parameters for "short" (linter and test) and "cover & race" (test)
+COVER="-cover -coverprofile=./reports/coverage.txt -covermode=atomic"
+FAST=""
+RACE="-race"
+SHORT=""
+
+showHelp(){
+    echo
+    echo "Script executes linters and tests."
+    echo "usage: ./scripts/tools/runChecks.sh [options]"
+    echo
+    echo "Options:"
+    echo "-c        excludes coverage report"
+    echo "-h, -?    shows this help"
+    echo "-r        exclude checks for race conditions"
+    echo "-s        executes only fast linters & tests"
+    echo
+}
+
+while getopts "h?crs" opt; do
+    case "$opt" in
+        c)
+            COVER=""
+            ;;
+        h|\?)
+            showHelp
+            exit 0
+            ;;
+        r)
+            RACE=""
+            ;;
+        s)
+            FAST="--fast"
+            SHORT="-short"
+            ;;
+    esac
+done
 
 # Execute linter
 echo
 echo -en "\E[40;35m\033[1mExecute linters\033[0m"
 echo
-gometalinter --config=gometalinter.json
+gometalinter ${FAST} --config=gometalinter.json
 EXIT_CODE=$?
 if [[ ${EXIT_CODE} != 0 ]]
 then
@@ -20,7 +55,7 @@ fi
 # Execute tests
 echo -en "\E[40;35m\033[1mExecute tests\033[0m"
 echo
-go test -v -cover -race -coverprofile=./reports/coverage.txt -covermode=atomic ./...
+go test -v ${SHORT} ${RACE} ${COVER} ./...
 EXIT_CODE=$?
 if [[ ${EXIT_CODE} != 0 ]]
 then
