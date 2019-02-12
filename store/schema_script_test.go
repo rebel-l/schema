@@ -5,8 +5,8 @@ import (
 	"time"
 )
 
-func TestNewSchemaVersionSuccess(t *testing.T) {
-	expected := SchemaVersion{
+func TestNewSchemaScriptSuccess(t *testing.T) {
+	expected := SchemaScript{
 		ScriptName: "something.sql",
 		ExecutedAt: time.Now(),
 		Status:     StatusSuccess,
@@ -35,8 +35,8 @@ func TestNewSchemaVersionSuccess(t *testing.T) {
 	}
 }
 
-func TestNewSchemaVersionError(t *testing.T) {
-	expected := SchemaVersion{
+func TestNewSchemaScriptError(t *testing.T) {
+	expected := SchemaScript{
 		ScriptName: "failing.sql",
 		ExecutedAt: time.Now(),
 		Status:     StatusError,

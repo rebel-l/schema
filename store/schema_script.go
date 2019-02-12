@@ -10,8 +10,8 @@ const (
 	StatusError = "error"
 )
 
-// SchemaVersion represents the version information stored in the database
-type SchemaVersion struct {
+// SchemaScript represents the version information stored in the database
+type SchemaScript struct {
 	ID         int64     `db:"id"`
 	ScriptName string    `db:"script_name"`
 	ExecutedAt time.Time `db:"executed_at"`
@@ -19,18 +19,18 @@ type SchemaVersion struct {
 	ErrorMsg   string    `db:"error_msg"`
 }
 
-// NewSchemaVersionSuccess returns a new SchemaVersion struct prepared for successful execution
-func NewSchemaVersionSuccess(scriptName string) *SchemaVersion {
-	return &SchemaVersion{
+// NewSchemaVersionSuccess returns a new SchemaScript struct prepared for successful execution
+func NewSchemaVersionSuccess(scriptName string) *SchemaScript {
+	return &SchemaScript{
 		ScriptName: scriptName,
 		ExecutedAt: time.Now(),
 		Status:     StatusSuccess,
 	}
 }
 
-// NewSchemaVersionError returns a new SchemaVersion struct prepared for failed execution
-func NewSchemaVersionError(scriptName string, errorMsg string) *SchemaVersion {
-	return &SchemaVersion{
+// NewSchemaVersionError returns a new SchemaScript struct prepared for failed execution
+func NewSchemaVersionError(scriptName string, errorMsg string) *SchemaScript {
+	return &SchemaScript{
 		ScriptName: scriptName,
 		ExecutedAt: time.Now(),
 		Status:     StatusError,

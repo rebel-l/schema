@@ -49,7 +49,7 @@ func TestSchemaVersionMapper_GetByID_Integration(t *testing.T) {
 	testcases := []struct {
 		name     string
 		dbFile   string
-		expected *store.SchemaVersion
+		expected *store.SchemaScript
 	}{
 		{
 			name:     "success entry",
@@ -125,7 +125,7 @@ func TestSchemaVersionMapper_GetAll_Integration(t *testing.T) {
 	}
 	defer shutdownDB(db, t)
 
-	expected := []*store.SchemaVersion{
+	expected := []*store.SchemaScript{
 		store.NewSchemaVersionSuccess("success.sql"),
 		store.NewSchemaVersionError("error.sql", "a message"),
 	}

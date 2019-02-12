@@ -20,8 +20,8 @@ const (
 
 // Versioner provides methods to manage the access to log of SQL script executions
 type Versioner interface {
-	Add(entry *store.SchemaVersion) error
-	GetByID(id int64) (*store.SchemaVersion, error)
+	Add(entry *store.SchemaScript) error
+	GetByID(id int64) (*store.SchemaScript, error)
 }
 
 // Schema provides commands to organize your database schema

@@ -6,7 +6,7 @@ import (
 
 const dateTimeFormat = "2006-01-02T15:04:05Z"
 
-// SchemaVersionMapper is responsible for mapping and storing SchemaVersion struct in database
+// SchemaVersionMapper is responsible for mapping and storing SchemaScript struct in database
 type SchemaVersionMapper struct {
 	db DatabaseConnector
 }
@@ -17,9 +17,9 @@ func NewSchemaVersionMapper(db DatabaseConnector) SchemaVersionMapper {
 }
 
 // Add adds a new row to the table
-func (svm SchemaVersionMapper) Add(entry *SchemaVersion) error {
+func (svm SchemaVersionMapper) Add(entry *SchemaScript) error {
 	if entry == nil {
-		return fmt.Errorf("SchemaVersion, add: dataset must be provided")
+		return fmt.Errorf("SchemaScript, add: dataset must be provided")
 	}
 
 	q := `
@@ -40,35 +40,35 @@ func (svm SchemaVersionMapper) Add(entry *SchemaVersion) error {
 	)
 
 	if err != nil {
-		return fmt.Errorf("SchemaVersion, add failed: %s", err)
+		return fmt.Errorf("SchemaScript, add failed: %s", err)
 	}
 
 	entry.ID, err = res.LastInsertId()
 	if err != nil {
-		return fmt.Errorf("SchemaVersion, add returns no new id: %s", err)
+		return fmt.Errorf("SchemaScript, add returns no new id: %s", err)
 	}
 
 	return nil
 }
 
-// GetByID returns the SchemaVersion entry found for provided id
-func (svm SchemaVersionMapper) GetByID(id int64) (*SchemaVersion, error) {
+// GetByID returns the SchemaScript entry found for provided id
+func (svm SchemaVersionMapper) GetByID(id int64) (*SchemaScript, error) {
 	if id < 1 {
-		return nil, fmt.Errorf("SchemaVersion, get by id: id must be greater than zero")
+		return nil, fmt.Errorf("SchemaScript, get by id: id must be greater than zero")
 	}
 
-	sv := &SchemaVersion{}
+	sv := &SchemaScript{}
 	q := `SELECT * from schema_version WHERE id = ?`
 	if err := svm.db.Get(sv, q, id); err != nil {
-		return nil, fmt.Errorf("SchemaVersion, get by id failed: %s", err)
+		return nil, fmt.Errorf("SchemaScript, get by id failed: %s", err)
 	}
 
 	return sv, nil
 }
 
-// GetAll returns all SchemaVersion entries
-func (svm SchemaVersionMapper) GetAll() ([]*SchemaVersion, error) {
-	var versions []*SchemaVersion
+// GetAll returns all SchemaScript entries
+func (svm SchemaVersionMapper) GetAll() ([]*SchemaScript, error) {
+	var versions []*SchemaScript
 	q := `SELECT * FROM schema_version`
 	if err := svm.db.Select(&versions, q); err != nil {
 		return nil, err
