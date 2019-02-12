@@ -30,7 +30,7 @@ func TestSchemaVersionMapper_Add_Integration(t *testing.T) {
 	// now the test
 	expected := store.NewSchemaScriptSuccess("some_script.sql")
 
-	vm := store.NewSchemaVersionMapper(db)
+	vm := store.NewSchemaScriptMapper(db)
 	err = vm.Add(expected)
 	if err != nil {
 		t.Fatalf("No error expected on adding entry to database: %s", err)
@@ -72,7 +72,7 @@ func TestSchemaVersionMapper_GetByID_Integration(t *testing.T) {
 			defer shutdownDB(db, t)
 
 			expected := testcase.expected
-			vm := store.NewSchemaVersionMapper(db)
+			vm := store.NewSchemaScriptMapper(db)
 			err = vm.Add(expected)
 			if err != nil {
 				t.Fatalf("No error expected on adding entry to database: %s", err)
@@ -130,7 +130,7 @@ func TestSchemaVersionMapper_GetAll_Integration(t *testing.T) {
 		store.NewSchemaScriptError("error.sql", "a message"),
 	}
 
-	vm := store.NewSchemaVersionMapper(db)
+	vm := store.NewSchemaScriptMapper(db)
 	for _, v := range expected {
 		err = vm.Add(v)
 		if err != nil {

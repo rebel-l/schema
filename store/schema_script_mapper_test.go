@@ -8,7 +8,7 @@ import (
 	"github.com/rebel-l/schema/mocks"
 )
 
-func TestSchemaVersionMapper_Add_Happy(t *testing.T) {
+func TestSchemaScriptMapper_Add_Happy(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -23,7 +23,7 @@ func TestSchemaVersionMapper_Add_Happy(t *testing.T) {
 		Exec(gomock.Any(), version.ScriptName, version.ExecutedAt.Format(dateTimeFormat), version.Status, version.ErrorMsg).
 		Return(mockRes, nil)
 
-	mapper := NewSchemaVersionMapper(mockDb)
+	mapper := NewSchemaScriptMapper(mockDb)
 	if err := mapper.Add(version); err != nil {
 		t.Errorf("error is not expected but got: %s", err)
 	}
@@ -33,19 +33,19 @@ func TestSchemaVersionMapper_Add_Happy(t *testing.T) {
 	}
 }
 
-func TestSchemaVersionMapper_Add_Unhappy_NilEntry(t *testing.T) {
+func TestSchemaScriptMapper_Add_Unhappy_NilEntry(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
 	mockDb := mocks.NewMockDatabaseConnector(ctrl)
 	mockDb.EXPECT().Exec(gomock.Any()).Times(0)
-	mapper := NewSchemaVersionMapper(mockDb)
+	mapper := NewSchemaScriptMapper(mockDb)
 	if err := mapper.Add(nil); err == nil {
 		t.Errorf("nil should be not allowed and throw an error")
 	}
 }
 
-func TestSchemaVersionMapper_Add_Unhappy_InsertError(t *testing.T) {
+func TestSchemaScriptMapper_Add_Unhappy_InsertError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -59,13 +59,13 @@ func TestSchemaVersionMapper_Add_Unhappy_InsertError(t *testing.T) {
 		Exec(gomock.Any(), version.ScriptName, version.ExecutedAt.Format(dateTimeFormat), version.Status, version.ErrorMsg).
 		Return(mockRes, errors.New("insert failed"))
 
-	mapper := NewSchemaVersionMapper(mockDb)
+	mapper := NewSchemaScriptMapper(mockDb)
 	if err := mapper.Add(version); err == nil {
 		t.Errorf("error is expected on failing insert")
 	}
 }
 
-func TestSchemaVersionMapper_Add_Unhappy_LastInsertError(t *testing.T) {
+func TestSchemaScriptMapper_Add_Unhappy_LastInsertError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -79,13 +79,13 @@ func TestSchemaVersionMapper_Add_Unhappy_LastInsertError(t *testing.T) {
 		Exec(gomock.Any(), version.ScriptName, version.ExecutedAt.Format(dateTimeFormat), version.Status, version.ErrorMsg).
 		Return(mockRes, nil)
 
-	mapper := NewSchemaVersionMapper(mockDb)
+	mapper := NewSchemaScriptMapper(mockDb)
 	if err := mapper.Add(version); err == nil {
 		t.Errorf("error is expected on failing insert")
 	}
 }
 
-func TestSchemaVersionMapper_GetByID_Happy(t *testing.T) {
+func TestSchemaScriptMapper_GetByID_Happy(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -94,14 +94,14 @@ func TestSchemaVersionMapper_GetByID_Happy(t *testing.T) {
 	mockDb := mocks.NewMockDatabaseConnector(ctrl)
 	mockDb.EXPECT().Get(gomock.Any(), gomock.Any(), id).Return(nil)
 
-	mapper := NewSchemaVersionMapper(mockDb)
+	mapper := NewSchemaScriptMapper(mockDb)
 	_, err := mapper.GetByID(id)
 	if err != nil {
 		t.Errorf("no error expected on reading")
 	}
 }
 
-func TestSchemaVersionMapper_GetByID_Unhappy_ID(t *testing.T) {
+func TestSchemaScriptMapper_GetByID_Unhappy_ID(t *testing.T) {
 	tcs := []struct {
 		name string
 		id   int64
@@ -123,7 +123,7 @@ func TestSchemaVersionMapper_GetByID_Unhappy_ID(t *testing.T) {
 			mockDb := mocks.NewMockDatabaseConnector(ctrl)
 			mockDb.EXPECT().Select(gomock.Any(), gomock.Any()).Times(0)
 
-			mapper := NewSchemaVersionMapper(mockDb)
+			mapper := NewSchemaScriptMapper(mockDb)
 			res, err := mapper.GetByID(tc.id)
 			if err == nil {
 				t.Errorf("get entry with zero or negative id should cause an error")
@@ -137,7 +137,7 @@ func TestSchemaVersionMapper_GetByID_Unhappy_ID(t *testing.T) {
 	}
 }
 
-func TestSchemaVersionMapper_GetByID_Unhappy_SelectError(t *testing.T) {
+func TestSchemaScriptMapper_GetByID_Unhappy_SelectError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -146,7 +146,7 @@ func TestSchemaVersionMapper_GetByID_Unhappy_SelectError(t *testing.T) {
 	mockDb := mocks.NewMockDatabaseConnector(ctrl)
 	mockDb.EXPECT().Get(gomock.Any(), gomock.Any(), id).Return(errors.New("select failed"))
 
-	mapper := NewSchemaVersionMapper(mockDb)
+	mapper := NewSchemaScriptMapper(mockDb)
 	res, err := mapper.GetByID(id)
 	if err == nil {
 		t.Errorf("expected error on reading failure")
@@ -157,7 +157,7 @@ func TestSchemaVersionMapper_GetByID_Unhappy_SelectError(t *testing.T) {
 	}
 }
 
-func TestSchemaVersionMapper_GetAll_Happy(t *testing.T) {
+func TestSchemaScriptMapper_GetAll_Happy(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -165,14 +165,14 @@ func TestSchemaVersionMapper_GetAll_Happy(t *testing.T) {
 	empty := make([]interface{}, 0)
 	mockDb.EXPECT().Select(gomock.Any(), gomock.Any(), gomock.Eq(empty))
 
-	mapper := NewSchemaVersionMapper(mockDb)
+	mapper := NewSchemaScriptMapper(mockDb)
 	_, err := mapper.GetAll()
 	if err != nil {
 		t.Errorf("no error expected on getting all entries")
 	}
 }
 
-func TestSchemaVersionMapper_GetAll_Unhappy(t *testing.T) {
+func TestSchemaScriptMapper_GetAll_Unhappy(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -180,7 +180,7 @@ func TestSchemaVersionMapper_GetAll_Unhappy(t *testing.T) {
 	empty := make([]interface{}, 0)
 	mockDb.EXPECT().Select(gomock.Any(), gomock.Any(), gomock.Eq(empty)).Return(errors.New("select failed"))
 
-	mapper := NewSchemaVersionMapper(mockDb)
+	mapper := NewSchemaScriptMapper(mockDb)
 	res, err := mapper.GetAll()
 	if err == nil {
 		t.Errorf("expected error on reading failure")

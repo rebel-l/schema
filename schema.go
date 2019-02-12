@@ -36,7 +36,7 @@ type Schema struct {
 func New(logger logrus.FieldLogger, db store.DatabaseConnector) Schema {
 	return Schema{
 		Logger:    logger,
-		versioner: store.NewSchemaVersionMapper(db),
+		versioner: store.NewSchemaScriptMapper(db),
 	}
 }
 
