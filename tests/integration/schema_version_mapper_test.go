@@ -28,7 +28,7 @@ func TestSchemaVersionMapper_Add_Integration(t *testing.T) {
 	defer shutdownDB(db, t)
 
 	// now the test
-	expected := store.NewSchemaVersionSuccess("some_script.sql")
+	expected := store.NewSchemaScriptSuccess("some_script.sql")
 
 	vm := store.NewSchemaVersionMapper(db)
 	err = vm.Add(expected)
@@ -54,12 +54,12 @@ func TestSchemaVersionMapper_GetByID_Integration(t *testing.T) {
 		{
 			name:     "success entry",
 			dbFile:   "./../data/storage/get_success_integration_tests.db",
-			expected: store.NewSchemaVersionSuccess("success.sql"),
+			expected: store.NewSchemaScriptSuccess("success.sql"),
 		},
 		{
 			name:     "error entry",
 			dbFile:   "./../data/storage/get_error_integration_tests.db",
-			expected: store.NewSchemaVersionError("error.sql", "an error message"),
+			expected: store.NewSchemaScriptError("error.sql", "an error message"),
 		},
 	}
 
@@ -126,8 +126,8 @@ func TestSchemaVersionMapper_GetAll_Integration(t *testing.T) {
 	defer shutdownDB(db, t)
 
 	expected := []*store.SchemaScript{
-		store.NewSchemaVersionSuccess("success.sql"),
-		store.NewSchemaVersionError("error.sql", "a message"),
+		store.NewSchemaScriptSuccess("success.sql"),
+		store.NewSchemaScriptError("error.sql", "a message"),
 	}
 
 	vm := store.NewSchemaVersionMapper(db)

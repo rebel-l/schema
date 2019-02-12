@@ -13,7 +13,7 @@ func TestSchemaVersionMapper_Add_Happy(t *testing.T) {
 	defer ctrl.Finish()
 
 	expectedID := int64(101)
-	version := NewSchemaVersionSuccess("my_sql_script.sql")
+	version := NewSchemaScriptSuccess("my_sql_script.sql")
 
 	mockRes := mocks.NewMockResult(ctrl)
 	mockRes.EXPECT().LastInsertId().Return(expectedID, nil)
@@ -49,7 +49,7 @@ func TestSchemaVersionMapper_Add_Unhappy_InsertError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	version := NewSchemaVersionSuccess("my_sql_script.sql")
+	version := NewSchemaScriptSuccess("my_sql_script.sql")
 
 	mockRes := mocks.NewMockResult(ctrl)
 	mockRes.EXPECT().LastInsertId().Times(0)
@@ -69,7 +69,7 @@ func TestSchemaVersionMapper_Add_Unhappy_LastInsertError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	version := NewSchemaVersionSuccess("my_sql_script.sql")
+	version := NewSchemaScriptSuccess("my_sql_script.sql")
 
 	mockRes := mocks.NewMockResult(ctrl)
 	mockRes.EXPECT().LastInsertId().Return(int64(0), errors.New("last insert failed"))

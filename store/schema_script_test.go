@@ -12,7 +12,7 @@ func TestNewSchemaScriptSuccess(t *testing.T) {
 		Status:     StatusSuccess,
 	}
 
-	actual := NewSchemaVersionSuccess(expected.ScriptName)
+	actual := NewSchemaScriptSuccess(expected.ScriptName)
 
 	if actual.ID > 0 {
 		t.Errorf("expected id to be 0 but got %d", actual.ID)
@@ -43,7 +43,7 @@ func TestNewSchemaScriptError(t *testing.T) {
 		ErrorMsg:   "houston we have a problem",
 	}
 
-	actual := NewSchemaVersionError(expected.ScriptName, expected.ErrorMsg)
+	actual := NewSchemaScriptError(expected.ScriptName, expected.ErrorMsg)
 
 	if actual.ID > 0 {
 		t.Errorf("expected id to be 0 but got %d", actual.ID)

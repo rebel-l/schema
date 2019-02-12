@@ -19,8 +19,8 @@ type SchemaScript struct {
 	ErrorMsg   string    `db:"error_msg"`
 }
 
-// NewSchemaVersionSuccess returns a new SchemaScript struct prepared for successful execution
-func NewSchemaVersionSuccess(scriptName string) *SchemaScript {
+// NewSchemaScriptSuccess returns a new SchemaScript struct prepared for successful execution
+func NewSchemaScriptSuccess(scriptName string) *SchemaScript {
 	return &SchemaScript{
 		ScriptName: scriptName,
 		ExecutedAt: time.Now(),
@@ -28,8 +28,8 @@ func NewSchemaVersionSuccess(scriptName string) *SchemaScript {
 	}
 }
 
-// NewSchemaVersionError returns a new SchemaScript struct prepared for failed execution
-func NewSchemaVersionError(scriptName string, errorMsg string) *SchemaScript {
+// NewSchemaScriptError returns a new SchemaScript struct prepared for failed execution
+func NewSchemaScriptError(scriptName string, errorMsg string) *SchemaScript {
 	return &SchemaScript{
 		ScriptName: scriptName,
 		ExecutedAt: time.Now(),
