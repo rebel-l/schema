@@ -23,7 +23,7 @@ func (svm SchemaScriptMapper) Add(entry *SchemaScript) error {
 	}
 
 	q := `
-		INSERT INTO schema_version (
+		INSERT INTO schema_script (
 			script_name,
   			executed_at,
   			execution_status,
@@ -58,7 +58,7 @@ func (svm SchemaScriptMapper) GetByID(id int64) (*SchemaScript, error) {
 	}
 
 	sv := &SchemaScript{}
-	q := `SELECT * from schema_version WHERE id = ?`
+	q := `SELECT * from schema_script WHERE id = ?`
 	if err := svm.db.Get(sv, q, id); err != nil {
 		return nil, fmt.Errorf("SchemaScriptMapper, get by id failed: %s", err)
 	}
@@ -69,7 +69,7 @@ func (svm SchemaScriptMapper) GetByID(id int64) (*SchemaScript, error) {
 // GetAll returns all SchemaScript entries
 func (svm SchemaScriptMapper) GetAll() ([]*SchemaScript, error) {
 	var versions []*SchemaScript
-	q := `SELECT * FROM schema_version`
+	q := `SELECT * FROM schema_script`
 	if err := svm.db.Select(&versions, q); err != nil {
 		return nil, err
 	}
