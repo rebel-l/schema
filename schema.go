@@ -8,11 +8,14 @@ import (
 )
 
 const (
-	// CommandCycle is the command to recreate the schema
-	CommandCycle = "cycle"
+	// CommandCreate is the command to create the schema
+	CommandCreate = "create"
 
 	// CommandMigrate is the command to apply the latest schema changes
 	CommandMigrate = "migrate"
+
+	// CommandRecreate is the command to recreate the schema
+	CommandRecreate = "recreate"
 )
 
 // Versioner provides methods to manage the access to log of SQL script executions
