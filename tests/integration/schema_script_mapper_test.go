@@ -16,7 +16,7 @@ func equalDateTime(expected time.Time, actual time.Time) bool {
 	return e == a
 }
 
-func TestSchemaVersionMapper_Add_Integration(t *testing.T) {
+func TestSchemaScriptMapper_Add_Integration(t *testing.T) {
 	if testing.Short() {
 		t.Skipf("skipped because of long running")
 	}
@@ -28,7 +28,7 @@ func TestSchemaVersionMapper_Add_Integration(t *testing.T) {
 	defer shutdownDB(db, t)
 
 	// now the test
-	expected := store.NewSchemaScriptSuccess("some_script.sql")
+	expected := store.NewSchemaScriptSuccess("some_script.sql", "0.5.2")
 
 	vm := store.NewSchemaScriptMapper(db)
 	err = vm.Add(expected)
@@ -41,7 +41,7 @@ func TestSchemaVersionMapper_Add_Integration(t *testing.T) {
 	}
 }
 
-func TestSchemaVersionMapper_GetByID_Integration(t *testing.T) {
+func TestSchemaScriptMapper_GetByID_Integration(t *testing.T) {
 	if testing.Short() {
 		t.Skipf("skipped because of long running")
 	}
@@ -54,12 +54,22 @@ func TestSchemaVersionMapper_GetByID_Integration(t *testing.T) {
 		{
 			name:     "success entry",
 			dbFile:   "./../data/storage/get_success_integration_tests.db",
-			expected: store.NewSchemaScriptSuccess("success.sql"),
+			expected: store.NewSchemaScriptSuccess("success.sql", ""),
+		},
+		{
+			name:     "success entry with app version",
+			dbFile:   "./../data/storage/get_success_with_app_version_integration_tests.db",
+			expected: store.NewSchemaScriptSuccess("success.sql", "0.8.11"),
 		},
 		{
 			name:     "error entry",
 			dbFile:   "./../data/storage/get_error_integration_tests.db",
-			expected: store.NewSchemaScriptError("error.sql", "an error message"),
+			expected: store.NewSchemaScriptError("error.sql", "", "an error message"),
+		},
+		{
+			name:     "error entry with app version",
+			dbFile:   "./../data/storage/get_error_with_app_version_integration_tests.db",
+			expected: store.NewSchemaScriptError("error.sql", "master-20190212-2354", "an error message"),
 		},
 	}
 
@@ -108,13 +118,17 @@ func TestSchemaVersionMapper_GetByID_Integration(t *testing.T) {
 			}
 
 			if expected.ScriptName != actual.ScriptName {
-				t.Errorf("Expected script name '%s' but git '%s'", expected.ScriptName, actual.ScriptName)
+				t.Errorf("Expected script name '%s' but got '%s'", expected.ScriptName, actual.ScriptName)
+			}
+
+			if expected.AppVersion != actual.AppVersion {
+				t.Errorf("Expected app version '%s' but got '%s'", expected.AppVersion, actual.AppVersion)
 			}
 		})
 	}
 }
 
-func TestSchemaVersionMapper_GetAll_Integration(t *testing.T) {
+func TestSchemaScriptMapper_GetAll_Integration(t *testing.T) {
 	if testing.Short() {
 		t.Skipf("skipped because of long running")
 	}
@@ -126,8 +140,8 @@ func TestSchemaVersionMapper_GetAll_Integration(t *testing.T) {
 	defer shutdownDB(db, t)
 
 	expected := []*store.SchemaScript{
-		store.NewSchemaScriptSuccess("success.sql"),
-		store.NewSchemaScriptError("error.sql", "a message"),
+		store.NewSchemaScriptSuccess("success.sql", "0.7.3"),
+		store.NewSchemaScriptError("error.sql", "", "a message"),
 	}
 
 	vm := store.NewSchemaScriptMapper(db)
@@ -167,7 +181,11 @@ func TestSchemaVersionMapper_GetAll_Integration(t *testing.T) {
 		}
 
 		if e.ScriptName != a.ScriptName {
-			t.Errorf("Expected script name '%s' but git '%s'", e.ScriptName, a.ScriptName)
+			t.Errorf("Expected script name '%s' but got '%s'", e.ScriptName, a.ScriptName)
+		}
+
+		if e.AppVersion != a.AppVersion {
+			t.Errorf("Expected app version '%s' but got '%s'", e.AppVersion, a.AppVersion)
 		}
 	}
 }

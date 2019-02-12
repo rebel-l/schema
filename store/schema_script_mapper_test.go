@@ -13,23 +13,23 @@ func TestSchemaScriptMapper_Add_Happy(t *testing.T) {
 	defer ctrl.Finish()
 
 	expectedID := int64(101)
-	version := NewSchemaScriptSuccess("my_sql_script.sql")
+	script := NewSchemaScriptSuccess("my_sql_script.sql", "0.1.0")
 
 	mockRes := mocks.NewMockResult(ctrl)
 	mockRes.EXPECT().LastInsertId().Return(expectedID, nil)
 
 	mockDb := mocks.NewMockDatabaseConnector(ctrl)
 	mockDb.EXPECT().
-		Exec(gomock.Any(), version.ScriptName, version.ExecutedAt.Format(dateTimeFormat), version.Status, version.ErrorMsg).
+		Exec(gomock.Any(), script.ScriptName, script.ExecutedAt.Format(dateTimeFormat), script.Status, script.ErrorMsg, script.AppVersion).
 		Return(mockRes, nil)
 
 	mapper := NewSchemaScriptMapper(mockDb)
-	if err := mapper.Add(version); err != nil {
+	if err := mapper.Add(script); err != nil {
 		t.Errorf("error is not expected but got: %s", err)
 	}
 
-	if version.ID != expectedID {
-		t.Errorf("id was not set to entry, expected %d but got %d", expectedID, version.ID)
+	if script.ID != expectedID {
+		t.Errorf("id was not set to entry, expected %d but got %d", expectedID, script.ID)
 	}
 }
 
@@ -49,18 +49,18 @@ func TestSchemaScriptMapper_Add_Unhappy_InsertError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	version := NewSchemaScriptSuccess("my_sql_script.sql")
+	script := NewSchemaScriptSuccess("my_sql_script.sql", "0.2.0")
 
 	mockRes := mocks.NewMockResult(ctrl)
 	mockRes.EXPECT().LastInsertId().Times(0)
 
 	mockDb := mocks.NewMockDatabaseConnector(ctrl)
 	mockDb.EXPECT().
-		Exec(gomock.Any(), version.ScriptName, version.ExecutedAt.Format(dateTimeFormat), version.Status, version.ErrorMsg).
+		Exec(gomock.Any(), script.ScriptName, script.ExecutedAt.Format(dateTimeFormat), script.Status, script.ErrorMsg, script.AppVersion).
 		Return(mockRes, errors.New("insert failed"))
 
 	mapper := NewSchemaScriptMapper(mockDb)
-	if err := mapper.Add(version); err == nil {
+	if err := mapper.Add(script); err == nil {
 		t.Errorf("error is expected on failing insert")
 	}
 }
@@ -69,18 +69,18 @@ func TestSchemaScriptMapper_Add_Unhappy_LastInsertError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	version := NewSchemaScriptSuccess("my_sql_script.sql")
+	script := NewSchemaScriptSuccess("my_sql_script.sql", "")
 
 	mockRes := mocks.NewMockResult(ctrl)
 	mockRes.EXPECT().LastInsertId().Return(int64(0), errors.New("last insert failed"))
 
 	mockDb := mocks.NewMockDatabaseConnector(ctrl)
 	mockDb.EXPECT().
-		Exec(gomock.Any(), version.ScriptName, version.ExecutedAt.Format(dateTimeFormat), version.Status, version.ErrorMsg).
+		Exec(gomock.Any(), script.ScriptName, script.ExecutedAt.Format(dateTimeFormat), script.Status, script.ErrorMsg, script.AppVersion).
 		Return(mockRes, nil)
 
 	mapper := NewSchemaScriptMapper(mockDb)
-	if err := mapper.Add(version); err == nil {
+	if err := mapper.Add(script); err == nil {
 		t.Errorf("error is expected on failing insert")
 	}
 }

@@ -27,8 +27,9 @@ func (svm SchemaScriptMapper) Add(entry *SchemaScript) error {
 			script_name,
   			executed_at,
   			execution_status,
-  			error_msg
-		) VALUES (?, ?, ?, ?)
+  			error_msg,
+			app_version
+		) VALUES (?, ?, ?, ?, ?)
 	`
 
 	res, err := svm.db.Exec(
@@ -37,6 +38,7 @@ func (svm SchemaScriptMapper) Add(entry *SchemaScript) error {
 		entry.ExecutedAt.Format(dateTimeFormat),
 		entry.Status,
 		entry.ErrorMsg,
+		entry.AppVersion,
 	)
 
 	if err != nil {

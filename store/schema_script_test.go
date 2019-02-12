@@ -10,9 +10,10 @@ func TestNewSchemaScriptSuccess(t *testing.T) {
 		ScriptName: "something.sql",
 		ExecutedAt: time.Now(),
 		Status:     StatusSuccess,
+		AppVersion: "0.1.3",
 	}
 
-	actual := NewSchemaScriptSuccess(expected.ScriptName)
+	actual := NewSchemaScriptSuccess(expected.ScriptName, expected.AppVersion)
 
 	if actual.ID > 0 {
 		t.Errorf("expected id to be 0 but got %d", actual.ID)
@@ -27,7 +28,11 @@ func TestNewSchemaScriptSuccess(t *testing.T) {
 	}
 
 	if actual.Status != expected.Status {
-		t.Errorf("expected that satus is automatically set to '%s' but got '%s'", expected.Status, actual.Status)
+		t.Errorf("expected that status is automatically set to '%s' but got '%s'", expected.Status, actual.Status)
+	}
+
+	if actual.AppVersion != expected.AppVersion {
+		t.Errorf("expected that appVersion is automatically set to '%s' but got '%s'", expected.AppVersion, actual.AppVersion)
 	}
 
 	if actual.ErrorMsg != "" {
@@ -43,7 +48,7 @@ func TestNewSchemaScriptError(t *testing.T) {
 		ErrorMsg:   "houston we have a problem",
 	}
 
-	actual := NewSchemaScriptError(expected.ScriptName, expected.ErrorMsg)
+	actual := NewSchemaScriptError(expected.ScriptName, expected.AppVersion, expected.ErrorMsg)
 
 	if actual.ID > 0 {
 		t.Errorf("expected id to be 0 but got %d", actual.ID)
@@ -59,6 +64,10 @@ func TestNewSchemaScriptError(t *testing.T) {
 
 	if actual.Status != expected.Status {
 		t.Errorf("expected that satus is automatically set to '%s' but got '%s'", expected.Status, actual.Status)
+	}
+
+	if actual.AppVersion != expected.AppVersion {
+		t.Errorf("expected that appVersion is automatically set to '%s' but got '%s'", expected.AppVersion, actual.AppVersion)
 	}
 
 	if actual.ErrorMsg != expected.ErrorMsg {
