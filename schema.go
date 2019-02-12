@@ -42,5 +42,5 @@ func New(logger logrus.FieldLogger, db store.DatabaseConnector) Schema {
 
 // WithFlags initialises the CLI flags
 func (s Schema) WithFlags() {
-	// TODO
+	// TODO: should be not in lib, but in cli tool
 }
