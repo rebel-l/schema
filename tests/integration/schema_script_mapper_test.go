@@ -20,6 +20,7 @@ func TestSchemaScriptMapper_Add_Integration(t *testing.T) {
 	if testing.Short() {
 		t.Skipf("skipped because of long running")
 	}
+	t.Parallel()
 
 	db, err := initDB("./../data/storage/add_integration_tests.db")
 	if err != nil {
@@ -45,6 +46,7 @@ func TestSchemaScriptMapper_GetByID_Integration(t *testing.T) {
 	if testing.Short() {
 		t.Skipf("skipped because of long running")
 	}
+	t.Parallel()
 
 	testcases := []struct {
 		name     string
@@ -132,6 +134,7 @@ func TestSchemaScriptMapper_GetAll_Integration(t *testing.T) {
 	if testing.Short() {
 		t.Skipf("skipped because of long running")
 	}
+	t.Parallel()
 
 	db, err := initDB("./../data/storage/getall_integration_tests.db")
 	if err != nil {
