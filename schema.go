@@ -39,8 +39,3 @@ func New(logger logrus.FieldLogger, db store.DatabaseConnector) Schema {
 		versioner: store.NewSchemaScriptMapper(db),
 	}
 }
-
-// WithFlags initialises the CLI flags
-func (s Schema) WithFlags() {
-	// TODO: should be not in lib, but in cli tool
-}
