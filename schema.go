@@ -18,8 +18,8 @@ const (
 	CommandRecreate = "recreate"
 )
 
-// Versioner provides methods to manage the access to log of SQL script executions
-type Versioner interface {
+// Scripter provides methods to manage the access to log of SQL script executions
+type Scripter interface {
 	Add(entry *store.SchemaScript) error
 	GetByID(id int64) (*store.SchemaScript, error)
 }
@@ -29,13 +29,13 @@ type Schema struct {
 	PathOfSchemaFiles string
 	Logger            logrus.FieldLogger
 	Command           string
-	versioner         Versioner
+	scripter          Scripter
 }
 
 // New returns a Schema struct
 func New(logger logrus.FieldLogger, db store.DatabaseConnector) Schema {
 	return Schema{
-		Logger:    logger,
-		versioner: store.NewSchemaScriptMapper(db),
+		Logger:   logger,
+		scripter: store.NewSchemaScriptMapper(db),
 	}
 }
