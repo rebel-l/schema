@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS some_more(id INTEGER);
