@@ -1,4 +1,4 @@
-package integration
+package sqlfile_test
 
 import (
 	"testing"
@@ -14,15 +14,15 @@ func TestScanHappy(t *testing.T) {
 	}{
 		{
 			name: "case1 with different files",
-			path: "./../data/sqlfile/case1",
+			path: "./../tests/data/sqlfile/case1",
 			expected: []string{
-				"./../data/sqlfile/case1/001_with_content.sql",
-				"./../data/sqlfile/case1/004_some_more.sql",
+				"./../tests/data/sqlfile/case1/001_with_content.sql",
+				"./../tests/data/sqlfile/case1/004_some_more.sql",
 			},
 		},
 		{
 			name:     "case2 with no files",
-			path:     "./../data/sqlfile/case2",
+			path:     "./../tests/data/sqlfile/case2",
 			expected: []string{},
 		},
 	}
