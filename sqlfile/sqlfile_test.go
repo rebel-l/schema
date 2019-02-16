@@ -3,6 +3,7 @@ package sqlfile_test
 import (
 	"testing"
 
+	"github.com/rebel-l/go-utils/array"
 	"github.com/rebel-l/schema/sqlfile"
 )
 
@@ -34,7 +35,7 @@ func TestScanHappy(t *testing.T) {
 				t.Fatalf("scan shouldn't cause error: %s", err)
 			}
 
-			if !strArrayEquals(testCase.expected, actual) {
+			if !array.StringArrayEquals(testCase.expected, actual) {
 				t.Errorf("Expected %#v but got %#v", testCase.expected, actual)
 			}
 		})
@@ -46,19 +47,4 @@ func TestScanUnhappy(t *testing.T) {
 	if err == nil {
 		t.Error("Scan empty path should cause an error")
 	}
-}
-
-func strArrayEquals(a []string, b []string) bool {
-	// TODO: should be part of utils
-	if len(a) != len(b) {
-		return false
-	}
-
-	for i := 0; i < len(a); i++ {
-		if a[i] != b[i] {
-			return false
-		}
-	}
-
-	return true
 }

@@ -37,39 +37,42 @@
   version = "v1.10.0"
 
 [[projects]]
-  digest = "1:e0647f8ba9bdde6b578186def5b3f0925ff25f0ec4386d092f9df9d452a204c8"
+  digest = "1:341de7485bb546670cca536c43bd03650384ac11734e718523aa85ffc48ce352"
   name = "github.com/rebel-l/go-utils"
-  packages = ["osutils"]
+  packages = [
+    "array",
+    "osutils",
+  ]
   pruneopts = "UT"
-  revision = "a0ffb9ed4660a4d517ca8f98da9e9a93094aeb19"
-  version = "0.1.0"
+  revision = "2c15f288b31db8c647f5b8185f893945b886c6ab"
+  version = "0.2.0"
 
 [[projects]]
-  digest = "1:69b1cc331fca23d702bd72f860c6a647afd0aa9fcbc1d0659b1365e26546dd70"
+  digest = "1:87c2e02fb01c27060ccc5ba7c5a407cc91147726f8f40b70cceeedbc52b1f3a8"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
   pruneopts = "UT"
-  revision = "bcd833dfe83d3cebad139e4a29ed79cb2318bf95"
-  version = "v1.2.0"
+  revision = "e1e72e9de974bd926e5c56f83753fba2df402ce5"
+  version = "v1.3.0"
 
 [[projects]]
   branch = "master"
-  digest = "1:38f553aff0273ad6f367cb0a0f8b6eecbaef8dc6cb8b50e57b6a81c1d5b1e332"
+  digest = "1:fde12c4da6237363bf36b81b59aa36a43d28061167ec4acb0d41fc49464e28b9"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "UT"
-  revision = "505ab145d0a99da450461ae2c1a9f6cd10d1f447"
+  revision = "74369b46fc6756741c016591724fd1cb8e26845f"
 
 [[projects]]
   branch = "master"
-  digest = "1:10405139b45e3a97a3842c93984710e30466eb933545f219ad3f5e45246973b4"
+  digest = "1:0d703f14f9bbbe1070ff0ce86d749dcbc9d68fb0ae554252c09bd4bb37a072e7"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "9a3f9b0469bbc6b8802087ae5c0af9f61502de01"
+  revision = "d0b11bdaac8adb652bff00e49bcacf992835621a"
 
 [solve-meta]
   analyzer-name = "dep"
@@ -78,6 +81,7 @@
     "github.com/golang/mock/gomock",
     "github.com/jmoiron/sqlx",
     "github.com/mattn/go-sqlite3",
+    "github.com/rebel-l/go-utils/array",
     "github.com/rebel-l/go-utils/osutils",
     "github.com/sirupsen/logrus",
   ]
