@@ -69,7 +69,7 @@ func (svm SchemaScriptMapper) GetByID(id int64) (*SchemaScript, error) {
 }
 
 // GetAll returns all SchemaScript entries
-func (svm SchemaScriptMapper) GetAll() ([]*SchemaScript, error) {
+func (svm SchemaScriptMapper) GetAll() (SchemaScriptCollection, error) {
 	var versions []*SchemaScript
 	q := `SELECT * FROM schema_script`
 	if err := svm.db.Select(&versions, q); err != nil {
