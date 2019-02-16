@@ -48,3 +48,33 @@ func TestScanUnhappy(t *testing.T) {
 		t.Error("Scan empty path should cause an error")
 	}
 }
+
+func TestReadHappy(t *testing.T) {
+	expected := `
+CREATE TABLE IF NOT EXISTS test (
+id INTEGER
+);
+CREATE TABLE IF NOT EXISTS another (
+id INTEGER
+);`
+	fileName := "./../tests/data/sqlfile/Read/test.sql"
+	actual, err := sqlfile.Read(fileName)
+	if err != nil {
+		t.Errorf("Expected that file name %s is readable but got %s", fileName, err)
+	}
+
+	if expected != actual {
+		t.Errorf("Expected file content '%s' but got '%s'", expected, actual)
+	}
+}
+
+func TestReadUnhappy(t *testing.T) {
+	content, err := sqlfile.Read("not_exist.sql")
+	if err == nil {
+		t.Error("Expected that error is thrown for not existing file")
+	}
+
+	if content != "" {
+		t.Errorf("Expected that content is empty on error but got %s", content)
+	}
+}

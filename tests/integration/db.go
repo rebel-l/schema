@@ -1,13 +1,13 @@
 package integration
 
 import (
-	"bufio"
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/jmoiron/sqlx"
+
 	"github.com/rebel-l/go-utils/osutils"
+	"github.com/rebel-l/schema/sqlfile"
 )
 
 const (
@@ -32,24 +32,12 @@ func initDB(dbFile string) (*sqlx.DB, error) {
 		return nil, err
 	}
 
-	file, err := os.Open(schemaFile)
+	content, err := sqlfile.Read(schemaFile)
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = file.Close()
-	}()
 
-	scanner := bufio.NewScanner(file)
-	var buffer string
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if len(line) > 0 {
-			buffer += "\n" + line
-		}
-	}
-
-	_, err = db.Exec(buffer)
+	_, err = db.Exec(content)
 	if err != nil {
 		return nil, err
 	}

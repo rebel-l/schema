@@ -1,9 +1,12 @@
 package sqlfile
 
 import (
+	"bufio"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
+	"strings"
 )
 
 // Scan returns a sorted (asc) list of files (including path) ending with .sql
@@ -31,4 +34,26 @@ func Scan(path string) ([]string, error) {
 		cleaned = append(cleaned, path+"/"+v.Name())
 	}
 	return cleaned, nil
+}
+
+// Read returns the content of a file
+func Read(fileName string) (string, error) {
+	file, err := os.Open(filepath.Clean(fileName))
+
+	if err != nil {
+		return "", err
+	}
+	defer func() {
+		err = file.Close()
+	}()
+
+	scanner := bufio.NewScanner(file)
+	var buffer string
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if len(line) > 0 {
+			buffer += "\n" + line
+		}
+	}
+	return buffer, nil
 }

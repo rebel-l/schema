@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS test (
+  id INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS another (
+  id INTEGER
+);
