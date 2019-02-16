@@ -1,6 +1,8 @@
 package store
 
-import "time"
+import (
+	"time"
+)
 
 const (
 	// StatusSuccess is the status name for 'success'
@@ -39,4 +41,18 @@ func NewSchemaScriptError(scriptName string, appVersion string, errorMsg string)
 		ErrorMsg:   errorMsg,
 		AppVersion: appVersion,
 	}
+}
+
+// SchemaScriptCollection represent an array of SchemaScript providing useful functions
+type SchemaScriptCollection []*SchemaScript
+
+// ScriptExecuted returns true if the given scriptName was already executed successful
+func (s SchemaScriptCollection) ScriptExecuted(scriptName string) bool {
+	for _, v := range s {
+		if v.ScriptName == scriptName && v.Status == StatusSuccess {
+			return true
+		}
+	}
+
+	return false
 }

@@ -74,3 +74,86 @@ func TestNewSchemaScriptError(t *testing.T) {
 		t.Errorf("expected error mesage to be '%s' but got '%s'", expected.ErrorMsg, actual.ErrorMsg)
 	}
 }
+
+func TestSchemaScriptCollection_ScriptExecuted(t *testing.T) {
+	testCases := []struct {
+		name       string
+		scriptName string
+		collection SchemaScriptCollection
+		expected   bool
+	}{
+		{
+			name:       "empty collection",
+			scriptName: "something.sql",
+			expected:   false,
+		},
+		{
+			name:       "one item in collection, no hit",
+			scriptName: "something.sql",
+			collection: SchemaScriptCollection{
+				&SchemaScript{ScriptName: "else.sql", Status: StatusSuccess},
+			},
+			expected: false,
+		},
+		{
+			name:       "two items in collection, no hit",
+			scriptName: "something.sql",
+			collection: SchemaScriptCollection{
+				&SchemaScript{ScriptName: "else.sql", Status: StatusSuccess},
+				&SchemaScript{ScriptName: "else2.sql", Status: StatusSuccess},
+			},
+			expected: false,
+		},
+		{
+			name: "empty script name",
+			collection: SchemaScriptCollection{
+				&SchemaScript{ScriptName: "else.sql", Status: StatusSuccess},
+				&SchemaScript{ScriptName: "else2.sql", Status: StatusSuccess},
+			},
+			expected: false,
+		},
+		{
+			name:       "one item in collection, hit",
+			scriptName: "hit.sql",
+			collection: SchemaScriptCollection{
+				&SchemaScript{ScriptName: "hit.sql", Status: StatusSuccess},
+			},
+			expected: true,
+		},
+		{
+			name:       "two items in collection, hit",
+			scriptName: "hit.sql",
+			collection: SchemaScriptCollection{
+				&SchemaScript{ScriptName: "hit1.sql", Status: StatusSuccess},
+				&SchemaScript{ScriptName: "hit.sql", Status: StatusSuccess},
+			},
+			expected: true,
+		},
+		{
+			name:       "one error item in collection",
+			scriptName: "hit.sql",
+			collection: SchemaScriptCollection{
+				&SchemaScript{ScriptName: "hit.sql", Status: StatusError},
+			},
+			expected: false,
+		},
+		{
+			name:       "one error item, one success item in collection",
+			scriptName: "hit.sql",
+			collection: SchemaScriptCollection{
+				&SchemaScript{ScriptName: "hit1.sql", Status: StatusSuccess},
+				&SchemaScript{ScriptName: "hit.sql", Status: StatusError},
+			},
+			expected: false,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			actual := testCase.collection.ScriptExecuted(testCase.scriptName)
+			if testCase.expected != actual {
+				t.Errorf("Expected for script '%s' and collection %v result is %t but got %t", testCase.scriptName, testCase.collection, testCase.expected, actual)
+			}
+		})
+	}
+}
