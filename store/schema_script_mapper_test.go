@@ -6,6 +6,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/rebel-l/schema/mocks"
+	"github.com/rebel-l/schema/mocks/store_mock"
 )
 
 func TestSchemaScriptMapper_Add_Happy(t *testing.T) {
@@ -18,7 +19,7 @@ func TestSchemaScriptMapper_Add_Happy(t *testing.T) {
 	mockRes := mocks.NewMockResult(ctrl)
 	mockRes.EXPECT().LastInsertId().Return(expectedID, nil)
 
-	mockDb := mocks.NewMockDatabaseConnector(ctrl)
+	mockDb := store_mock.NewMockDatabaseConnector(ctrl)
 	mockDb.EXPECT().
 		Exec(gomock.Any(), script.ScriptName, script.ExecutedAt.Format(dateTimeFormat), script.Status, script.ErrorMsg, script.AppVersion).
 		Return(mockRes, nil)
@@ -37,7 +38,7 @@ func TestSchemaScriptMapper_Add_Unhappy_NilEntry(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockDb := mocks.NewMockDatabaseConnector(ctrl)
+	mockDb := store_mock.NewMockDatabaseConnector(ctrl)
 	mockDb.EXPECT().Exec(gomock.Any()).Times(0)
 	mapper := NewSchemaScriptMapper(mockDb)
 	if err := mapper.Add(nil); err == nil {
@@ -54,7 +55,7 @@ func TestSchemaScriptMapper_Add_Unhappy_InsertError(t *testing.T) {
 	mockRes := mocks.NewMockResult(ctrl)
 	mockRes.EXPECT().LastInsertId().Times(0)
 
-	mockDb := mocks.NewMockDatabaseConnector(ctrl)
+	mockDb := store_mock.NewMockDatabaseConnector(ctrl)
 	mockDb.EXPECT().
 		Exec(gomock.Any(), script.ScriptName, script.ExecutedAt.Format(dateTimeFormat), script.Status, script.ErrorMsg, script.AppVersion).
 		Return(mockRes, errors.New("insert failed"))
@@ -74,7 +75,7 @@ func TestSchemaScriptMapper_Add_Unhappy_LastInsertError(t *testing.T) {
 	mockRes := mocks.NewMockResult(ctrl)
 	mockRes.EXPECT().LastInsertId().Return(int64(0), errors.New("last insert failed"))
 
-	mockDb := mocks.NewMockDatabaseConnector(ctrl)
+	mockDb := store_mock.NewMockDatabaseConnector(ctrl)
 	mockDb.EXPECT().
 		Exec(gomock.Any(), script.ScriptName, script.ExecutedAt.Format(dateTimeFormat), script.Status, script.ErrorMsg, script.AppVersion).
 		Return(mockRes, nil)
@@ -91,7 +92,7 @@ func TestSchemaScriptMapper_GetByID_Happy(t *testing.T) {
 
 	id := int64(203)
 
-	mockDb := mocks.NewMockDatabaseConnector(ctrl)
+	mockDb := store_mock.NewMockDatabaseConnector(ctrl)
 	mockDb.EXPECT().Get(gomock.Any(), gomock.Any(), id).Return(nil)
 
 	mapper := NewSchemaScriptMapper(mockDb)
@@ -120,7 +121,7 @@ func TestSchemaScriptMapper_GetByID_Unhappy_ID(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 
-			mockDb := mocks.NewMockDatabaseConnector(ctrl)
+			mockDb := store_mock.NewMockDatabaseConnector(ctrl)
 			mockDb.EXPECT().Select(gomock.Any(), gomock.Any()).Times(0)
 
 			mapper := NewSchemaScriptMapper(mockDb)
@@ -143,7 +144,7 @@ func TestSchemaScriptMapper_GetByID_Unhappy_SelectError(t *testing.T) {
 
 	id := int64(666)
 
-	mockDb := mocks.NewMockDatabaseConnector(ctrl)
+	mockDb := store_mock.NewMockDatabaseConnector(ctrl)
 	mockDb.EXPECT().Get(gomock.Any(), gomock.Any(), id).Return(errors.New("select failed"))
 
 	mapper := NewSchemaScriptMapper(mockDb)
@@ -161,7 +162,7 @@ func TestSchemaScriptMapper_GetAll_Happy(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockDb := mocks.NewMockDatabaseConnector(ctrl)
+	mockDb := store_mock.NewMockDatabaseConnector(ctrl)
 	empty := make([]interface{}, 0)
 	mockDb.EXPECT().Select(gomock.Any(), gomock.Any(), gomock.Eq(empty))
 
@@ -176,7 +177,7 @@ func TestSchemaScriptMapper_GetAll_Unhappy(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockDb := mocks.NewMockDatabaseConnector(ctrl)
+	mockDb := store_mock.NewMockDatabaseConnector(ctrl)
 	empty := make([]interface{}, 0)
 	mockDb.EXPECT().Select(gomock.Any(), gomock.Any(), gomock.Eq(empty)).Return(errors.New("select failed"))
 

@@ -1,6 +1,6 @@
 package store
 
-//go:generate mockgen -destination=../mocks/database_connector_mock.go -package=mocks github.com/rebel-l/schema/store DatabaseConnector
+//go:generate mockgen -destination=../mocks/store_mock/database_connector_mock.go -package=store_mock github.com/rebel-l/schema/store DatabaseConnector
 
 import (
 	"github.com/jmoiron/sqlx"

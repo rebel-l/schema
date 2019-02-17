@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"github.com/rebel-l/schema/mocks"
 
 	"github.com/rebel-l/schema/initdb"
+	"github.com/rebel-l/schema/mocks/store_mock"
 	"github.com/rebel-l/schema/tests/integration"
 )
 
@@ -20,6 +20,7 @@ func TestInitDB_ApplyScript_Integration_Happy(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to open database: %s", err)
 	}
+	defer integration.ShutdownDB(db, t)
 
 	in := initdb.New(db)
 	err = in.ApplyScript("./../tests/data/initdb/001.sql")
@@ -81,9 +82,9 @@ func TestInitDB_ApplyScript_Integration_Unhappy(t *testing.T) {
 	}
 }
 
-func getMockDB(t *testing.T, errorMsg string) (*gomock.Controller, *mocks.MockDatabaseConnector) {
+func getMockDB(t *testing.T, errorMsg string) (*gomock.Controller, *store_mock.MockDatabaseConnector) {
 	ctrl := gomock.NewController(t)
-	mockDB := mocks.NewMockDatabaseConnector(ctrl)
+	mockDB := store_mock.NewMockDatabaseConnector(ctrl)
 	if errorMsg != "" {
 		mockDB.EXPECT().Exec(gomock.Any()).Return(nil, errors.New("something happened"))
 	}
@@ -103,7 +104,7 @@ func TestInitDB_Init_Happy(t *testing.T) {
   			error_msg TEXT NULL
 		);`
 
-	mockDB := mocks.NewMockDatabaseConnector(ctrl)
+	mockDB := store_mock.NewMockDatabaseConnector(ctrl)
 	mockDB.EXPECT().Exec(q).Return(nil, nil)
 
 	in := initdb.New(mockDB)
@@ -116,7 +117,7 @@ func TestInitDB_Init_Unhappy(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockDB := mocks.NewMockDatabaseConnector(ctrl)
+	mockDB := store_mock.NewMockDatabaseConnector(ctrl)
 	mockDB.EXPECT().Exec(gomock.Any()).Return(nil, errors.New("something happened"))
 
 	in := initdb.New(mockDB)
@@ -134,6 +135,7 @@ func TestInitDB_Init_Integration_Happy(t *testing.T) {
 	if err != nil {
 		t.Fatalf("not able to open database connection: %s", err)
 	}
+	defer integration.ShutdownDB(db, t)
 
 	in := initdb.New(db)
 	err = in.Init()

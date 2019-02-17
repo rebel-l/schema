@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS something_new(id INTEGER);
