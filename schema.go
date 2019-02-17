@@ -58,24 +58,13 @@ func New(logger logrus.FieldLogger, db store.DatabaseConnector) Schema {
 // Execute applies all sql scripts for a given folder
 func (s *Schema) Execute(path string, command string, version string) error {
 	// check path
-	if osutils.FileOrPathExists(path) == false {
+	if !osutils.FileOrPathExists(path) {
 		return fmt.Errorf("path '%s' doesn'T exists", path)
 	}
 
-	// preparation
-	switch command {
-	case CommandCreate:
-		if checkDatabaseExists(s.db) {
-			return fmt.Errorf("create database not possible if in use, to force please use command %s", CommandRecreate)
-		}
-	case CommandRecreate:
-		// TODO: drop all tables in schema ==> rollback all scripts
-	}
-
-	if command != CommandMigrate {
-		if err := s.applier.Init(); err != nil {
-			return err
-		}
+	err := s.prepare(command)
+	if err != nil {
+		return err
 	}
 
 	dbScripts, err := s.scripter.GetAll()
@@ -114,6 +103,25 @@ func (s *Schema) Execute(path string, command string, version string) error {
 		}
 	}
 
+	return nil
+}
+
+func (s *Schema) prepare(command string) error {
+	// preparation
+	switch command {
+	case CommandCreate:
+		if checkDatabaseExists(s.db) {
+			return fmt.Errorf("create database not possible if in use, to force please use command %s", CommandRecreate)
+		}
+	case CommandRecreate:
+		// TODO: drop all tables in schema ==> rollback all scripts
+	}
+
+	if command != CommandMigrate {
+		if err := s.applier.Init(); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 

@@ -37,10 +37,6 @@ func TestSchema_Execute_CommandMigrate_Happy(t *testing.T) {
 		t.Fatalf("not able count rows in table: %s", err)
 	}
 
-	if len(data) != 2 {
-		t.Fatalf("Expeted 2 rows in table but got %d", len(data))
-	}
-
 	expected := store.SchemaScriptCollection{
 		&store.SchemaScript{
 			ScriptName: "./tests/data/schema/001.sql",
@@ -52,22 +48,30 @@ func TestSchema_Execute_CommandMigrate_Happy(t *testing.T) {
 		},
 	}
 
+	checkScriptTable(expected, data, t)
+}
+
+func checkScriptTable(expected store.SchemaScriptCollection, actual store.SchemaScriptCollection, t *testing.T) {
+	if len(expected) != len(actual) {
+		t.Fatalf("Expeted %d rows in table but got %d", len(expected), len(actual))
+	}
+
 	for i, v := range expected {
-		actual := data[i]
-		if v.ScriptName != actual.ScriptName {
-			t.Errorf("Expected script name %s but got %s", v.ScriptName, actual.ScriptName)
+		w := actual[i]
+		if v.ScriptName != w.ScriptName {
+			t.Errorf("Expected script name %s but got %s", v.ScriptName, w.ScriptName)
 		}
 
-		if v.Status != actual.Status {
-			t.Errorf("Expected status %s but got %s", v.Status, actual.Status)
+		if v.Status != w.Status {
+			t.Errorf("Expected status %s but got %s", v.Status, w.Status)
 		}
 
-		if v.ErrorMsg != actual.ErrorMsg {
-			t.Errorf("Expected error message %s but got %s", v.ErrorMsg, actual.ErrorMsg)
+		if v.ErrorMsg != w.ErrorMsg {
+			t.Errorf("Expected error message %s but got %s", v.ErrorMsg, w.ErrorMsg)
 		}
 
-		if v.AppVersion != actual.AppVersion {
-			t.Errorf("Expected app version %s but got %s", v.AppVersion, actual.AppVersion)
+		if v.AppVersion != w.AppVersion {
+			t.Errorf("Expected app version %s but got %s", v.AppVersion, w.AppVersion)
 		}
 	}
 }
