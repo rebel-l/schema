@@ -8,11 +8,11 @@ import (
 	"github.com/rebel-l/schema/initdb"
 
 	"github.com/jmoiron/sqlx"
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/mattn/go-sqlite3" // sqlite3 driver is needed
 )
 
-// InitDB provides a database for integration tests
-func InitDB(dbFile string) (*sqlx.DB, error) {
+// GetDB provides a database connection for integration tests
+func GetDB(dbFile string) (*sqlx.DB, error) {
 	if osutils.FileOrPathExists(dbFile) {
 		err := os.Remove(dbFile)
 		if err != nil {
@@ -26,6 +26,12 @@ func InitDB(dbFile string) (*sqlx.DB, error) {
 	}
 
 	db, err := sqlx.Open("sqlite3", dbFile)
+	return db, err
+}
+
+// InitDB provides a database connection for integration tests and initialises the database
+func InitDB(dbFile string) (*sqlx.DB, error) {
+	db, err := GetDB(dbFile)
 	if err != nil {
 		return nil, err
 	}
