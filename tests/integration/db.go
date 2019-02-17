@@ -4,17 +4,15 @@ import (
 	"os"
 	"testing"
 
-	"github.com/jmoiron/sqlx"
-
 	"github.com/rebel-l/go-utils/osutils"
-	"github.com/rebel-l/schema/sqlfile"
+	"github.com/rebel-l/schema/initdb"
+
+	"github.com/jmoiron/sqlx"
+	_ "github.com/mattn/go-sqlite3"
 )
 
-const (
-	schemaFile = "./../../scripts/sql/001_create_table_schema_version.sql"
-)
-
-func initDB(dbFile string) (*sqlx.DB, error) {
+// InitDB provides a database for integration tests
+func InitDB(dbFile string) (*sqlx.DB, error) {
 	if osutils.FileOrPathExists(dbFile) {
 		err := os.Remove(dbFile)
 		if err != nil {
@@ -32,20 +30,13 @@ func initDB(dbFile string) (*sqlx.DB, error) {
 		return nil, err
 	}
 
-	content, err := sqlfile.Read(schemaFile)
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = db.Exec(content)
-	if err != nil {
-		return nil, err
-	}
-
+	in := initdb.New(db)
+	err = in.Init()
 	return db, err
 }
 
-func shutdownDB(db *sqlx.DB, t *testing.T) {
+// ShutdownDB closes database connection for integration tests
+func ShutdownDB(db *sqlx.DB, t *testing.T) {
 	if err := db.Close(); err != nil {
 		t.Fatalf("failed to close database: %s", err)
 	}
