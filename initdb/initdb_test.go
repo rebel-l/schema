@@ -2,6 +2,7 @@ package initdb_test
 
 import (
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -54,7 +55,7 @@ func TestInitDB_ApplyScript_Integration_Unhappy(t *testing.T) {
 		{
 			name:       "not existing script",
 			scriptName: "no_existing.sql",
-			expected:   "open no_existing.sql: The system cannot find the file specified.",
+			expected:   "open no_existing.sql:",
 		},
 		{
 			name:       "database error",
@@ -75,7 +76,7 @@ func TestInitDB_ApplyScript_Integration_Unhappy(t *testing.T) {
 				t.Error("Expected that error is returned")
 			}
 
-			if err != nil && testCase.expected != err.Error() {
+			if err != nil && !strings.Contains(err.Error(), testCase.expected) {
 				t.Errorf("Expected error message '%s' but got '%s'", testCase.expected, err)
 			}
 		})
