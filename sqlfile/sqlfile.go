@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 )
 
@@ -34,6 +35,18 @@ func Scan(path string) ([]string, error) {
 		cleaned = append(cleaned, path+"/"+v.Name())
 	}
 	return cleaned, nil
+}
+
+// ScanReverse does the same as Scan but returns the filenames in reverse order
+func ScanReverse(path string) ([]string, error) {
+	var files sort.StringSlice
+	var err error
+	files, err = Scan(path)
+	if err != nil {
+		return nil, err
+	}
+	sort.Sort(sort.Reverse(files))
+	return files, nil
 }
 
 // Read returns the content of a file
