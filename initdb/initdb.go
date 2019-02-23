@@ -30,6 +30,19 @@ func (i *InitDB) ApplyScript(fileName string) error {
 	return nil
 }
 
+// RevertScript reverts a script from the database
+func (i *InitDB) RevertScript(fileName string) error {
+	sqlScript, err := sqlfile.Read(fileName, sqlfile.CommandDowngrade)
+	if err != nil {
+		return err
+	}
+
+	if _, err = i.db.Exec(sqlScript); err != nil {
+		return err
+	}
+	return nil
+}
+
 // Init initializes the schema database
 func (i *InitDB) Init() error {
 	scripts := []string{

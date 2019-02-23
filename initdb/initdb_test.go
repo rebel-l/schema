@@ -83,6 +83,73 @@ func TestInitDB_ApplyScript_Integration_Unhappy(t *testing.T) {
 	}
 }
 
+func TestInitDB_RevertScript_Integration_Happy(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipped because of long running")
+	}
+
+	db, err := integration.InitDB("./../tests/data/storage/revert_script_integration.db")
+	if err != nil {
+		t.Fatalf("Failed to open database: %s", err)
+	}
+	defer integration.ShutdownDB(db, t)
+
+	in := initdb.New(db)
+	err = in.RevertScript("./../tests/data/initdb/001.sql")
+	if err != nil {
+		t.Errorf("Expected no error but got %s", err)
+	}
+
+	var counter []uint32
+	q := db.Rebind("SELECT count(id) FROM something;")
+	err = db.Select(&counter, q)
+	if err == nil {
+		t.Fatalf("table wasn't dropped: %s", err)
+	}
+}
+
+func TestInitDB_RevertScript_Integration_Unhappy(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipped because of long running")
+	}
+
+	testCases := []struct {
+		name       string
+		scriptName string
+		expected   string
+		dbErrorMsg string
+	}{
+		{
+			name:       "not existing script",
+			scriptName: "no_existing.sql",
+			expected:   "open no_existing.sql:",
+		},
+		{
+			name:       "database error",
+			scriptName: "./../tests/data/initdb/001.sql",
+			expected:   "something happened",
+			dbErrorMsg: "something happened",
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			ctrl, mockDB := getMockDB(t, testCase.dbErrorMsg)
+			defer ctrl.Finish()
+
+			in := initdb.New(mockDB)
+			err := in.RevertScript(testCase.scriptName)
+			if err == nil {
+				t.Error("Expected that error is returned")
+			}
+
+			if err != nil && !strings.Contains(err.Error(), testCase.expected) {
+				t.Errorf("Expected error message '%s' but got '%s'", testCase.expected, err)
+			}
+		})
+	}
+}
+
 func getMockDB(t *testing.T, errorMsg string) (*gomock.Controller, *store_mock.MockDatabaseConnector) {
 	ctrl := gomock.NewController(t)
 	mockDB := store_mock.NewMockDatabaseConnector(ctrl)
