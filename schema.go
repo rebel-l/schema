@@ -6,7 +6,6 @@ package schema
 import (
 	"fmt"
 
-	"github.com/rebel-l/go-utils/osutils"
 	"github.com/rebel-l/schema/initdb"
 	"github.com/rebel-l/schema/sqlfile"
 	"github.com/rebel-l/schema/store"
@@ -29,6 +28,7 @@ const (
 type Scripter interface {
 	Add(entry *store.SchemaScript) error
 	GetAll() (store.SchemaScriptCollection, error)
+	Remove(scriptName string) error
 }
 
 // Applier provides methods to apply sql script to database
@@ -58,11 +58,6 @@ func New(logger logrus.FieldLogger, db store.DatabaseConnector) Schema {
 
 // Execute applies all sql scripts for a given folder
 func (s *Schema) Execute(path string, command string, version string) error {
-	// check path
-	if !osutils.FileOrPathExists(path) {
-		return fmt.Errorf("path '%s' doesn't exists", path)
-	}
-
 	var err error
 	switch command {
 	case CommandUpgrade:
@@ -71,6 +66,8 @@ func (s *Schema) Execute(path string, command string, version string) error {
 		err = s.revert(path, 1)
 	case CommandRecreate:
 		err = s.recreate(path, version)
+	default:
+		err = fmt.Errorf("command '%s' not found", command)
 	}
 
 	return err
@@ -150,7 +147,9 @@ func (s *Schema) revert(path string, numOfScripts int) error {
 			return err
 		}
 
-		//TODO delete missing
+		if err = s.scripter.Remove(f); err != nil {
+			return err
+		}
 
 		counter++
 		if numOfScripts > 0 && counter >= numOfScripts {

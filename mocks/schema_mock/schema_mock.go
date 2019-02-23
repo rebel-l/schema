@@ -61,6 +61,20 @@ func (mr *MockApplierMockRecorder) Init() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Init", reflect.TypeOf((*MockApplier)(nil).Init))
 }
 
+// RevertScript mocks base method
+func (m *MockApplier) RevertScript(arg0 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RevertScript", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RevertScript indicates an expected call of RevertScript
+func (mr *MockApplierMockRecorder) RevertScript(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RevertScript", reflect.TypeOf((*MockApplier)(nil).RevertScript), arg0)
+}
+
 // MockScripter is a mock of Scripter interface
 type MockScripter struct {
 	ctrl     *gomock.Controller
@@ -111,4 +125,18 @@ func (m *MockScripter) GetAll() (store.SchemaScriptCollection, error) {
 func (mr *MockScripterMockRecorder) GetAll() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockScripter)(nil).GetAll))
+}
+
+// Remove mocks base method
+func (m *MockScripter) Remove(arg0 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Remove", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Remove indicates an expected call of Remove
+func (mr *MockScripterMockRecorder) Remove(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Remove", reflect.TypeOf((*MockScripter)(nil).Remove), arg0)
 }

@@ -12,8 +12,8 @@ type SchemaScriptMapper struct {
 }
 
 // NewSchemaScriptMapper returns a new SchemaScriptMapper
-func NewSchemaScriptMapper(db DatabaseConnector) SchemaScriptMapper {
-	return SchemaScriptMapper{db: db}
+func NewSchemaScriptMapper(db DatabaseConnector) *SchemaScriptMapper {
+	return &SchemaScriptMapper{db: db}
 }
 
 // Add adds a new row to the table
