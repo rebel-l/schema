@@ -41,6 +41,44 @@ func TestSchemaScriptMapper_Add_Integration(t *testing.T) {
 	}
 }
 
+func TestSchemaScriptMapper_Remove_Integration(t *testing.T) {
+	if testing.Short() {
+		t.Skipf("skipped because of long running")
+	}
+	t.Parallel()
+
+	db, err := integration.InitDB("./../tests/data/storage/remove_integration_tests.db")
+	if err != nil {
+		t.Fatalf("not able to open database connection: %s", err)
+	}
+	defer integration.ShutdownDB(db, t)
+
+	// init data
+	script := store.NewSchemaScriptSuccess("my.sql", "")
+	sm := store.NewSchemaScriptMapper(db)
+	if err = sm.Add(script); err != nil {
+		t.Fatalf("Failed to prepare data: %s", err)
+	}
+
+	before, err := sm.GetAll()
+	if err != nil {
+		t.Fatalf("Failed to get all data: %s", err)
+	}
+
+	// now the test
+	if err = sm.Remove(script.ScriptName); err != nil {
+		t.Fatalf("Failed to remove entry: %s", err)
+	}
+	after, err := sm.GetAll()
+	if err != nil {
+		t.Fatalf("Failed to get all data again: %s", err)
+	}
+
+	if after.Len() >= before.Len() {
+		t.Errorf("Expected number of rows before (%d) is greater than after (%d)", before.Len(), after.Len())
+	}
+}
+
 func TestSchemaScriptMapper_GetByID_Integration(t *testing.T) {
 	if testing.Short() {
 		t.Skipf("skipped because of long running")

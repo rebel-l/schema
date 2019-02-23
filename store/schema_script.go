@@ -56,3 +56,8 @@ func (s SchemaScriptCollection) ScriptExecuted(scriptName string) bool {
 
 	return false
 }
+
+// Len returns number of elements in collection
+func (s SchemaScriptCollection) Len() int {
+	return len(s)
+}

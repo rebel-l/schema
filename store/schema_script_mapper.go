@@ -53,6 +53,19 @@ func (ssm SchemaScriptMapper) Add(entry *SchemaScript) error {
 	return nil
 }
 
+// Remove deletes an entry from table based on scriptName
+func (ssm *SchemaScriptMapper) Remove(scriptName string) error {
+	if scriptName == "" {
+		return fmt.Errorf("SchemaScriptMapper, remove: script name must be provided")
+	}
+
+	q := `DELETE FROM schema_script WHERE script_name = ?;`
+	if _, err := ssm.db.Exec(q, scriptName); err != nil {
+		return err
+	}
+	return nil
+}
+
 // GetByID returns the SchemaScript entry found for provided id
 func (ssm SchemaScriptMapper) GetByID(id int64) (*SchemaScript, error) {
 	if id < 1 {

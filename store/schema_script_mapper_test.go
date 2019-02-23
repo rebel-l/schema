@@ -86,6 +86,58 @@ func TestSchemaScriptMapper_Add_Unhappy_LastInsertError(t *testing.T) {
 	}
 }
 
+func TestSchemaScriptMapper_Remove_Happy(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	scriptName := "my_sql_script.sql"
+
+	mockRes := mocks.NewMockResult(ctrl)
+	mockRes.EXPECT().LastInsertId().Times(0)
+
+	mockDb := store_mock.NewMockDatabaseConnector(ctrl)
+	mockDb.EXPECT().
+		Exec(gomock.Any(), scriptName).
+		Return(mockRes, nil)
+
+	mapper := NewSchemaScriptMapper(mockDb)
+	if err := mapper.Remove(scriptName); err != nil {
+		t.Errorf("error is not expected but got: %s", err)
+	}
+}
+
+func TestSchemaScriptMapper_Remove_Unhappy_DeleteError(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	scriptName := "my_sql_script.sql"
+
+	mockRes := mocks.NewMockResult(ctrl)
+	mockRes.EXPECT().LastInsertId().Times(0)
+
+	mockDb := store_mock.NewMockDatabaseConnector(ctrl)
+	mockDb.EXPECT().
+		Exec(gomock.Any(), scriptName).
+		Return(mockRes, errors.New("delete failed"))
+
+	mapper := NewSchemaScriptMapper(mockDb)
+	if err := mapper.Remove(scriptName); err == nil {
+		t.Errorf("error is expected on failing delete")
+	}
+}
+
+func TestSchemaScriptMapper_Remove_Unhappy_EmptyScriptName(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockDb := store_mock.NewMockDatabaseConnector(ctrl)
+	mockDb.EXPECT().Exec(gomock.Any()).Times(0)
+	mapper := NewSchemaScriptMapper(mockDb)
+	if err := mapper.Remove(""); err == nil {
+		t.Errorf("empty script name should be not allowed and throw an error")
+	}
+}
+
 func TestSchemaScriptMapper_GetByID_Happy(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
