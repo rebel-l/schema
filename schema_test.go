@@ -29,10 +29,10 @@ func TestSchema_Execute_CommandUpgrade_Happy(t *testing.T) {
 	mockScripter.EXPECT().Add(gomock.Any()).Times(2).Return(nil)
 
 	schema := Schema{
-		Logger:   getMockLogger(ctrl, true),
+		logger:   getMockLogger(ctrl, true),
 		db:       mockDB,
-		applier:  mockApplier,
-		scripter: mockScripter,
+		Applier:  mockApplier,
+		Scripter: mockScripter,
 	}
 
 	if err := schema.Execute("./tests/data/schema/unit", CommandUpgrade, ""); err != nil {
@@ -54,10 +54,10 @@ func TestSchema_Execute_CommandUpgrade_Unhappy_GetAllError(t *testing.T) {
 	mockScripter.EXPECT().GetAll().Times(1).Return(store.SchemaScriptCollection{}, errors.New("failed"))
 
 	schema := Schema{
-		Logger:   getMockLogger(ctrl, true),
+		logger:   getMockLogger(ctrl, true),
 		db:       mockDB,
-		applier:  mockApplier,
-		scripter: mockScripter,
+		Applier:  mockApplier,
+		Scripter: mockScripter,
 	}
 
 	if err := schema.Execute("./tests/data/schema/unit", CommandUpgrade, ""); err == nil {
@@ -87,9 +87,9 @@ func TestSchema_Execute_CommandUpgrade_Unhappy_ApplyError(t *testing.T) {
 	mockApplier.EXPECT().ApplyScript("./tests/data/schema/unit/001.sql").Return(errors.New(expected))
 
 	schema := Schema{
-		Logger:   mockLogger,
-		applier:  mockApplier,
-		scripter: mockScripter,
+		logger:   mockLogger,
+		Applier:  mockApplier,
+		Scripter: mockScripter,
 		db:       mockDB,
 	}
 
@@ -124,9 +124,9 @@ func TestSchema_Execute_CommandUpgrade_Unhappy_AddError(t *testing.T) {
 	mockApplier.EXPECT().ApplyScript("./tests/data/schema/unit/001.sql").Return(nil)
 
 	schema := Schema{
-		Logger:   mockLogger,
-		applier:  mockApplier,
-		scripter: mockScripter,
+		logger:   mockLogger,
+		Applier:  mockApplier,
+		Scripter: mockScripter,
 		db:       mockDB,
 	}
 
@@ -163,9 +163,9 @@ func TestSchema_Execute_CommandUpgrade_Unhappy_ApplyErrorAddError(t *testing.T) 
 	mockApplier.EXPECT().ApplyScript("./tests/data/schema/unit/001.sql").Return(errors.New(expected1))
 
 	schema := Schema{
-		Logger:   mockLogger,
-		applier:  mockApplier,
-		scripter: mockScripter,
+		logger:   mockLogger,
+		Applier:  mockApplier,
+		Scripter: mockScripter,
 		db:       mockDB,
 	}
 
@@ -194,9 +194,9 @@ func TestSchema_Execute_CommandRevert_Unhappy_RevertError(t *testing.T) {
 	mockScripter.EXPECT().GetAll().Times(1).Return(res, nil)
 
 	schema := Schema{
-		Logger:   getMockLogger(ctrl, true),
-		applier:  mockApplier,
-		scripter: mockScripter,
+		logger:   getMockLogger(ctrl, true),
+		Applier:  mockApplier,
+		Scripter: mockScripter,
 	}
 
 	if err := schema.Execute("./tests/data/schema/unit", CommandRevert, ""); err == nil {
@@ -220,9 +220,9 @@ func TestSchema_Execute_CommandRevert_Unhappy_RemoveError(t *testing.T) {
 	mockScripter.EXPECT().Remove("./tests/data/schema/unit/002.sql").Return(errors.New("failed"))
 
 	schema := Schema{
-		Logger:   getMockLogger(ctrl, true),
-		applier:  mockApplier,
-		scripter: mockScripter,
+		logger:   getMockLogger(ctrl, true),
+		Applier:  mockApplier,
+		Scripter: mockScripter,
 	}
 
 	if err := schema.Execute("./tests/data/schema/unit", CommandRevert, ""); err == nil {
@@ -274,8 +274,8 @@ func TestSchema_Execute_Unhappy_NotExistingPath(t *testing.T) {
 			mockScripter.EXPECT().GetAll().Times(1).Return(store.SchemaScriptCollection{}, nil)
 
 			schema := Schema{
-				Logger:   getMockLogger(ctrl, true),
-				scripter: mockScripter,
+				logger:   getMockLogger(ctrl, true),
+				Scripter: mockScripter,
 			}
 			if testCase.command == CommandUpgrade {
 				mockDB := getMockDB(ctrl, false)
@@ -340,7 +340,7 @@ func getMockLogger(ctrl *gomock.Controller, dummy bool) *logrus_mock.MockFieldLo
 
 func getSchemaWithDummies(ctrl *gomock.Controller) Schema {
 	return Schema{
-		Logger: getMockLogger(ctrl, true),
+		logger: getMockLogger(ctrl, true),
 		db:     getMockDB(ctrl, true),
 	}
 }

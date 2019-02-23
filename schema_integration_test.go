@@ -2,6 +2,8 @@ package schema_test
 
 import (
 	"fmt"
+	"io"
+	"os"
 	"testing"
 
 	"github.com/jmoiron/sqlx"
@@ -26,26 +28,23 @@ func TestSchema_Execute_CommandUpgrade_Happy(t *testing.T) {
 	defer integration.ShutdownDB(db, t)
 
 	s := schema.New(log, db)
-	err = s.Execute("./tests/data/schema", schema.CommandUpgrade, "")
+	err = s.Execute("./tests/data/schema/upgrade", schema.CommandUpgrade, "")
 	if err != nil {
 		t.Errorf("Expected no error but got %s", err)
 	}
 
-	// check entries in table schema_script
-	var data store.SchemaScriptCollection
-	q := "SELECT * FROM schema_script;"
-	err = db.Select(&data, q)
+	data, err := s.Scripter.GetAll()
 	if err != nil {
-		t.Fatalf("not able count rows in table: %s", err)
+		t.Fatalf("not able get rows from table: %s", err)
 	}
 
 	expected := store.SchemaScriptCollection{
 		&store.SchemaScript{
-			ScriptName: "./tests/data/schema/001.sql",
+			ScriptName: "./tests/data/schema/upgrade/001.sql",
 			Status:     store.StatusSuccess,
 		},
 		&store.SchemaScript{
-			ScriptName: "./tests/data/schema/002.sql",
+			ScriptName: "./tests/data/schema/upgrade/002.sql",
 			Status:     store.StatusSuccess,
 		},
 	}
@@ -53,6 +52,82 @@ func TestSchema_Execute_CommandUpgrade_Happy(t *testing.T) {
 	checkScriptTable(expected, data, t)
 	checkTable("something", db, t)
 	checkTable("something_new", db, t)
+}
+
+func TestSchema_Execute_CommandUpgrade_Happy_TwoSteps(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipped because of long running")
+	}
+
+	log := logrus.New()
+	db, err := integration.GetDB("./tests/data/storage/schema_execute_upgrade_twosteps.db")
+	if err != nil {
+		t.Fatalf("failed to init database: %s", err)
+	}
+	defer integration.ShutdownDB(db, t)
+
+	s := schema.New(log, db)
+
+	/**
+	STEP 1
+	*/
+	if err = copyFile("./tests/data/schema/upgrade/step1/001.sql", "./tests/data/schema/upgrade/two_steps/001.sql"); err != nil {
+		t.Fatalf("failed to copy file: %s", err)
+	}
+
+	err = s.Execute("./tests/data/schema/upgrade/two_steps", schema.CommandUpgrade, "")
+	if err != nil {
+		t.Errorf("Expected no error but got %s", err)
+	}
+
+	data, err := s.Scripter.GetAll()
+	if err != nil {
+		t.Fatalf("not able get rows from table: %s", err)
+	}
+
+	expected := store.SchemaScriptCollection{
+		&store.SchemaScript{
+			ScriptName: "./tests/data/schema/upgrade/two_steps/001.sql",
+			Status:     store.StatusSuccess,
+		},
+	}
+
+	checkScriptTable(expected, data, t)
+	checkTable("something", db, t)
+
+	/**
+	STEP 2
+	*/
+	if err = copyFile("./tests/data/schema/upgrade/step2/002.sql", "./tests/data/schema/upgrade/two_steps/002.sql"); err != nil {
+		t.Fatalf("failed to copy file: %s", err)
+	}
+
+	err = s.Execute("./tests/data/schema/upgrade/two_steps", schema.CommandUpgrade, "")
+	if err != nil {
+		t.Errorf("Expected no error but got %s", err)
+	}
+
+	data, err = s.Scripter.GetAll()
+	if err != nil {
+		t.Fatalf("not able get rows from table: %s", err)
+	}
+
+	expected = append(expected, &store.SchemaScript{
+		ScriptName: "./tests/data/schema/upgrade/two_steps/002.sql",
+		Status:     store.StatusSuccess,
+	})
+	checkScriptTable(expected, data, t)
+	checkTable("something", db, t)
+	checkTable("something_new", db, t)
+
+	// cleanup
+	if err = os.Remove("./tests/data/schema/upgrade/two_steps/001.sql"); err != nil {
+		t.Fatalf("Cleanup files failed: %s", err)
+	}
+
+	if err = os.Remove("./tests/data/schema/upgrade/two_steps/002.sql"); err != nil {
+		t.Fatalf("Cleanup files failed: %s", err)
+	}
 }
 
 func checkScriptTable(expected store.SchemaScriptCollection, actual store.SchemaScriptCollection, t *testing.T) {
@@ -93,11 +168,31 @@ func checkTable(tableName string, db *sqlx.DB, t *testing.T) {
 	}
 }
 
+// TODO: move this to go-utils
+func copyFile(src, dest string) error {
+	from, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		_ = from.Close()
+	}()
+
+	to, err := os.OpenFile(dest, os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		_ = to.Close()
+	}()
+
+	_, err = io.Copy(to, from)
+	return err
+}
+
 /*
 TODO:
 	Integration tests:
-		1. command upgrade happy with already executed scripts
 		2. command revert happy
 		3. command recreate ==> later
-	Unit tests ...
 */

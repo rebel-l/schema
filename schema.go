@@ -40,18 +40,18 @@ type Applier interface {
 
 // Schema provides commands to organize your database schema
 type Schema struct {
-	Logger   logrus.FieldLogger
-	scripter Scripter
-	applier  Applier
+	logger   logrus.FieldLogger
+	Scripter Scripter
+	Applier  Applier
 	db       store.DatabaseConnector
 }
 
 // New returns a Schema struct
 func New(logger logrus.FieldLogger, db store.DatabaseConnector) Schema {
 	return Schema{
-		Logger:   logger,
-		scripter: store.NewSchemaScriptMapper(db),
-		applier:  initdb.New(db),
+		logger:   logger,
+		Scripter: store.NewSchemaScriptMapper(db),
+		Applier:  initdb.New(db),
 		db:       db,
 	}
 }
@@ -75,12 +75,12 @@ func (s *Schema) Execute(path string, command string, version string) error {
 
 func (s *Schema) upgrade(path string, version string) error {
 	if !checkDatabaseExists(s.db) {
-		if err := s.applier.Init(); err != nil {
+		if err := s.Applier.Init(); err != nil {
 			return err
 		}
 	}
 
-	executedScripts, err := s.scripter.GetAll()
+	executedScripts, err := s.Scripter.GetAll()
 	if err != nil {
 		return err
 	}
@@ -102,16 +102,16 @@ func (s *Schema) upgrade(path string, version string) error {
 			continue
 		}
 
-		if err = s.applier.ApplyScript(f); err != nil {
-			s.Logger.Errorf("failed to execute script %s: %s", f, err)
-			if err2 := s.scripter.Add(store.NewSchemaScriptError(f, version, err.Error())); err2 != nil {
+		if err = s.Applier.ApplyScript(f); err != nil {
+			s.logger.Errorf("failed to execute script %s: %s", f, err)
+			if err2 := s.Scripter.Add(store.NewSchemaScriptError(f, version, err.Error())); err2 != nil {
 				err = fmt.Errorf("original error: %s, follow up error: %s", err, err2)
 			}
 
 			return err
 		}
 
-		if err = s.scripter.Add(store.NewSchemaScriptSuccess(f, version)); err != nil {
+		if err = s.Scripter.Add(store.NewSchemaScriptSuccess(f, version)); err != nil {
 			return err
 		}
 	}
@@ -119,7 +119,7 @@ func (s *Schema) upgrade(path string, version string) error {
 }
 
 func (s *Schema) revert(path string, numOfScripts int) error {
-	executedScripts, err := s.scripter.GetAll()
+	executedScripts, err := s.Scripter.GetAll()
 	if err != nil {
 		return err
 	}
@@ -143,11 +143,11 @@ func (s *Schema) revert(path string, numOfScripts int) error {
 			continue
 		}
 
-		if err = s.applier.RevertScript(f); err != nil {
+		if err = s.Applier.RevertScript(f); err != nil {
 			return err
 		}
 
-		if err = s.scripter.Remove(f); err != nil {
+		if err = s.Scripter.Remove(f); err != nil {
 			return err
 		}
 
