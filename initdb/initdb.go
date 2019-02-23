@@ -19,7 +19,7 @@ func New(db store.DatabaseConnector) *InitDB {
 
 // ApplyScript appliers a script to the database
 func (i *InitDB) ApplyScript(fileName string) error {
-	sqlScript, err := sqlfile.Read(fileName)
+	sqlScript, err := sqlfile.Read(fileName, sqlfile.CommandUpgrade)
 	if err != nil {
 		return err
 	}

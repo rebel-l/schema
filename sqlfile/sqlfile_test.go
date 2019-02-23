@@ -92,26 +92,45 @@ func TestScanReverseUnhappy(t *testing.T) {
 }
 
 func TestReadHappy(t *testing.T) {
-	expected := `
+	testCases := []struct {
+		command  string
+		expected string
+	}{
+		{
+			command: sqlfile.CommandUpgrade,
+			expected: `
 CREATE TABLE IF NOT EXISTS test (
 id INTEGER
 );
 CREATE TABLE IF NOT EXISTS another (
 id INTEGER
-);`
-	fileName := "./../tests/data/sqlfile/Read/test.sql"
-	actual, err := sqlfile.Read(fileName)
-	if err != nil {
-		t.Errorf("Expected that file name %s is readable but got %s", fileName, err)
+);`,
+		},
+		{
+			command: sqlfile.CommandDowngrade,
+			expected: `
+DROP TABLE IF EXISTS test;
+DROP TABLE IF EXISTS another;`,
+		},
 	}
 
-	if expected != actual {
-		t.Errorf("Expected file content '%s' but got '%s'", expected, actual)
+	for _, testCase := range testCases {
+		t.Run(testCase.command, func(t *testing.T) {
+			fileName := "./../tests/data/sqlfile/Read/test.sql"
+			actual, err := sqlfile.Read(fileName, testCase.command)
+			if err != nil {
+				t.Errorf("Expected that file name %s is readable but got %s", fileName, err)
+			}
+
+			if testCase.expected != actual {
+				t.Errorf("Expected file content '%s' but got '%s'", testCase.expected, actual)
+			}
+		})
 	}
 }
 
 func TestReadUnhappy(t *testing.T) {
-	content, err := sqlfile.Read("not_exist.sql")
+	content, err := sqlfile.Read("not_exist.sql", sqlfile.CommandUpgrade)
 	if err == nil {
 		t.Error("Expected that error is thrown for not existing file")
 	}
