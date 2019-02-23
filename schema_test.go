@@ -385,6 +385,21 @@ func TestSchema_Execute_Integration_CommandUpgrade_Happy_TwoSteps(t *testing.T) 
 
 	s := schema.New(log, db)
 
+	expected := step1(t, db, s)
+	step2(t, db, s, expected)
+
+	// cleanup
+	if err = os.Remove("./tests/data/schema/upgrade/two_steps/001.sql"); err != nil {
+		t.Fatalf("Cleanup files failed: %s", err)
+	}
+
+	if err = os.Remove("./tests/data/schema/upgrade/two_steps/002.sql"); err != nil {
+		t.Fatalf("Cleanup files failed: %s", err)
+	}
+}
+
+func step1(t *testing.T, db *sqlx.DB, s schema.Schema) store.SchemaScriptCollection {
+	var err error
 	/**
 	STEP 1
 	*/
@@ -411,7 +426,11 @@ func TestSchema_Execute_Integration_CommandUpgrade_Happy_TwoSteps(t *testing.T) 
 
 	checkScriptTable(expected, data, t)
 	checkTable("something", db, t)
+	return expected
+}
 
+func step2(t *testing.T, db *sqlx.DB, s schema.Schema, expected store.SchemaScriptCollection) {
+	var err error
 	/**
 	STEP 2
 	*/
@@ -424,7 +443,7 @@ func TestSchema_Execute_Integration_CommandUpgrade_Happy_TwoSteps(t *testing.T) 
 		t.Errorf("Expected no error but got %s", err)
 	}
 
-	data, err = s.Scripter.GetAll()
+	data, err := s.Scripter.GetAll()
 	if err != nil {
 		t.Fatalf("not able get rows from table: %s", err)
 	}
@@ -436,15 +455,6 @@ func TestSchema_Execute_Integration_CommandUpgrade_Happy_TwoSteps(t *testing.T) 
 	checkScriptTable(expected, data, t)
 	checkTable("something", db, t)
 	checkTable("something_new", db, t)
-
-	// cleanup
-	if err = os.Remove("./tests/data/schema/upgrade/two_steps/001.sql"); err != nil {
-		t.Fatalf("Cleanup files failed: %s", err)
-	}
-
-	if err = os.Remove("./tests/data/schema/upgrade/two_steps/002.sql"); err != nil {
-		t.Fatalf("Cleanup files failed: %s", err)
-	}
 }
 
 func checkScriptTable(expected store.SchemaScriptCollection, actual store.SchemaScriptCollection, t *testing.T) {
