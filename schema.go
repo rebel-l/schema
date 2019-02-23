@@ -15,14 +15,14 @@ import (
 )
 
 const (
-	// CommandCreate is the command to create the schema
-	CommandCreate = "create"
-
-	// CommandMigrate is the command to apply the latest schema changes
-	CommandMigrate = "migrate"
+	// CommandUpgrade is the command to apply the latest schema changes
+	CommandUpgrade = "upgrade"
 
 	// CommandRecreate is the command to recreate the schema
 	CommandRecreate = "recreate"
+
+	// CommandRevert is the command to rollback database to previous version
+	CommandRevert = "revert"
 )
 
 // Scripter provides methods to manage the access to log of SQL script executions
@@ -34,6 +34,7 @@ type Scripter interface {
 // Applier provides methods to apply sql script to database
 type Applier interface {
 	ApplyScript(fileName string) error
+	RevertScript(fileName string) error
 	Init() error
 }
 
@@ -59,15 +60,30 @@ func New(logger logrus.FieldLogger, db store.DatabaseConnector) Schema {
 func (s *Schema) Execute(path string, command string, version string) error {
 	// check path
 	if !osutils.FileOrPathExists(path) {
-		return fmt.Errorf("path '%s' doesn'T exists", path)
+		return fmt.Errorf("path '%s' doesn't exists", path)
 	}
 
-	err := s.prepare(command)
-	if err != nil {
-		return err
+	var err error
+	switch command {
+	case CommandUpgrade:
+		err = s.upgrade(path, version)
+	case CommandRevert:
+		err = s.revert(path, 1)
+	case CommandRecreate:
+		err = s.recreate(path, version)
 	}
 
-	dbScripts, err := s.scripter.GetAll()
+	return err
+}
+
+func (s *Schema) upgrade(path string, version string) error {
+	if !checkDatabaseExists(s.db) {
+		if err := s.applier.Init(); err != nil {
+			return err
+		}
+	}
+
+	executedScripts, err := s.scripter.GetAll()
 	if err != nil {
 		return err
 	}
@@ -85,7 +101,7 @@ func (s *Schema) Execute(path string, command string, version string) error {
 	}
 
 	for _, f := range files {
-		if dbScripts.ScriptExecuted(f) {
+		if executedScripts.ScriptExecuted(f) {
 			continue
 		}
 
@@ -102,27 +118,57 @@ func (s *Schema) Execute(path string, command string, version string) error {
 			return err
 		}
 	}
+	return nil
+}
+
+func (s *Schema) revert(path string, numOfScripts int) error {
+	executedScripts, err := s.scripter.GetAll()
+	if err != nil {
+		return err
+	}
+
+	/**
+	1. scan files reverse
+	2. iterate over files in directory
+	2a. check if file is applied
+	2b. if 2a) is true load each file revert from database
+	2c. remove executed script from 2b) from store as success or error
+	3. return after numOfScripts was reverted, -1 means all
+	*/
+	files, err := sqlfile.ScanReverse(path)
+	if err != nil {
+		return err
+	}
+
+	counter := 0
+	for _, f := range files {
+		if !executedScripts.ScriptExecuted(f) {
+			continue
+		}
+
+		if err = s.applier.RevertScript(f); err != nil {
+			return err
+		}
+
+		//TODO delete missing
+
+		counter++
+		if numOfScripts > 0 && counter >= numOfScripts {
+			break
+		}
+	}
 
 	return nil
 }
 
-func (s *Schema) prepare(command string) error {
-	// preparation
-	switch command {
-	case CommandCreate:
-		if checkDatabaseExists(s.db) {
-			return fmt.Errorf("create database not possible if in use, to force please use command %s", CommandRecreate)
-		}
-	case CommandRecreate:
-		// TODO: drop all tables in schema ==> rollback all scripts
+func (s *Schema) recreate(path string, version string) error {
+	var err error
+	if err = s.revert(path, -1); err != nil {
+		return err
 	}
 
-	if command != CommandMigrate {
-		if err := s.applier.Init(); err != nil {
-			return err
-		}
-	}
-	return nil
+	err = s.upgrade(path, version)
+	return err
 }
 
 func checkDatabaseExists(db store.DatabaseConnector) bool {

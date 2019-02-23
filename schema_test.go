@@ -1,30 +1,32 @@
 package schema_test
 
 import (
+	"fmt"
 	"testing"
 
-	"github.com/rebel-l/schema/store"
-
-	"github.com/rebel-l/schema/tests/integration"
-	"github.com/sirupsen/logrus"
+	"github.com/jmoiron/sqlx"
 
 	"github.com/rebel-l/schema"
+	"github.com/rebel-l/schema/store"
+	"github.com/rebel-l/schema/tests/integration"
+
+	"github.com/sirupsen/logrus"
 )
 
-func TestSchema_Execute_CommandMigrate_Happy(t *testing.T) {
+func TestSchema_Execute_CommandUpgrade_Happy(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipped because of long running")
 	}
 
 	log := logrus.New()
-	db, err := integration.InitDB("./tests/data/storage/schema_execute_migrate.db")
+	db, err := integration.GetDB("./tests/data/storage/schema_execute_upgrade.db")
 	if err != nil {
 		t.Fatalf("failed to init database: %s", err)
 	}
 	defer integration.ShutdownDB(db, t)
 
 	s := schema.New(log, db)
-	err = s.Execute("./tests/data/schema", schema.CommandMigrate, "")
+	err = s.Execute("./tests/data/schema", schema.CommandUpgrade, "")
 	if err != nil {
 		t.Errorf("Expected no error but got %s", err)
 	}
@@ -49,6 +51,8 @@ func TestSchema_Execute_CommandMigrate_Happy(t *testing.T) {
 	}
 
 	checkScriptTable(expected, data, t)
+	checkTable("something", db, t)
+	checkTable("something_new", db, t)
 }
 
 func checkScriptTable(expected store.SchemaScriptCollection, actual store.SchemaScriptCollection, t *testing.T) {
@@ -76,9 +80,24 @@ func checkScriptTable(expected store.SchemaScriptCollection, actual store.Schema
 	}
 }
 
+func checkTable(tableName string, db *sqlx.DB, t *testing.T) {
+	var counter []uint32
+	q := db.Rebind(fmt.Sprintf("SELECT count(id) FROM %s;", tableName))
+	err := db.Select(&counter, q)
+	if err != nil {
+		t.Fatalf("not able count rows in table: %s", err)
+	}
+
+	if len(counter) == 0 || counter[0] != 0 {
+		t.Error("not able to select from table")
+	}
+}
+
 /*
 TODO:
 	Integration tests:
-		1. command create happy
+		1. command upgrade happy with already executed scripts
+		2. command revert happy
 		3. command recreate ==> later
+	Unit tests ...
 */
