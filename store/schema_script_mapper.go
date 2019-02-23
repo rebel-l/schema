@@ -17,7 +17,7 @@ func NewSchemaScriptMapper(db DatabaseConnector) SchemaScriptMapper {
 }
 
 // Add adds a new row to the table
-func (svm SchemaScriptMapper) Add(entry *SchemaScript) error {
+func (ssm SchemaScriptMapper) Add(entry *SchemaScript) error {
 	if entry == nil {
 		return fmt.Errorf("SchemaScriptMapper, add: dataset must be provided")
 	}
@@ -32,7 +32,7 @@ func (svm SchemaScriptMapper) Add(entry *SchemaScript) error {
 		) VALUES (?, ?, ?, ?, ?)
 	`
 
-	res, err := svm.db.Exec(
+	res, err := ssm.db.Exec(
 		q,
 		entry.ScriptName,
 		entry.ExecutedAt.Format(dateTimeFormat),
@@ -54,14 +54,14 @@ func (svm SchemaScriptMapper) Add(entry *SchemaScript) error {
 }
 
 // GetByID returns the SchemaScript entry found for provided id
-func (svm SchemaScriptMapper) GetByID(id int64) (*SchemaScript, error) {
+func (ssm SchemaScriptMapper) GetByID(id int64) (*SchemaScript, error) {
 	if id < 1 {
 		return nil, fmt.Errorf("SchemaScriptMapper, get by id: id must be greater than zero")
 	}
 
 	sv := &SchemaScript{}
 	q := `SELECT * from schema_script WHERE id = ?`
-	if err := svm.db.Get(sv, q, id); err != nil {
+	if err := ssm.db.Get(sv, q, id); err != nil {
 		return nil, fmt.Errorf("SchemaScriptMapper, get by id failed: %s", err)
 	}
 
@@ -69,10 +69,10 @@ func (svm SchemaScriptMapper) GetByID(id int64) (*SchemaScript, error) {
 }
 
 // GetAll returns all SchemaScript entries
-func (svm SchemaScriptMapper) GetAll() (SchemaScriptCollection, error) {
+func (ssm SchemaScriptMapper) GetAll() (SchemaScriptCollection, error) {
 	var versions []*SchemaScript
 	q := `SELECT * FROM schema_script`
-	if err := svm.db.Select(&versions, q); err != nil {
+	if err := ssm.db.Select(&versions, q); err != nil {
 		return nil, err
 	}
 
