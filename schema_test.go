@@ -3,9 +3,10 @@ package schema_test
 import (
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"testing"
+
+	"github.com/rebel-l/go-utils/osutils"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/rebel-l/schema"
@@ -428,7 +429,7 @@ func step1(t *testing.T, db *sqlx.DB, s schema.Schema) store.SchemaScriptCollect
 	/**
 	STEP 1
 	*/
-	if err = copyFile("./tests/data/schema/upgrade/step1/001.sql", "./tests/data/schema/upgrade/two_steps/001.sql"); err != nil {
+	if err = osutils.CopyFile("./tests/data/schema/upgrade/step1/001.sql", "./tests/data/schema/upgrade/two_steps/001.sql"); err != nil {
 		t.Fatalf("failed to copy file: %s", err)
 	}
 
@@ -459,7 +460,7 @@ func step2(t *testing.T, db *sqlx.DB, s schema.Schema, expected store.SchemaScri
 	/**
 	STEP 2
 	*/
-	if err = copyFile("./tests/data/schema/upgrade/step2/002.sql", "./tests/data/schema/upgrade/two_steps/002.sql"); err != nil {
+	if err = osutils.CopyFile("./tests/data/schema/upgrade/step2/002.sql", "./tests/data/schema/upgrade/two_steps/002.sql"); err != nil {
 		t.Fatalf("failed to copy file: %s", err)
 	}
 
@@ -639,26 +640,4 @@ func checkTable(tableName string, db *sqlx.DB, t *testing.T, expectedCount uint3
 	if len(counter) == 0 || counter[0] != expectedCount {
 		t.Errorf("expected number of %d rows in table '%s' but got %d", expectedCount, tableName, counter[0])
 	}
-}
-
-// TODO: move this to go-utils
-func copyFile(src, dest string) error {
-	from, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		_ = from.Close()
-	}()
-
-	to, err := os.OpenFile(dest, os.O_RDWR|os.O_CREATE, 0644)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		_ = to.Close()
-	}()
-
-	_, err = io.Copy(to, from)
-	return err
 }

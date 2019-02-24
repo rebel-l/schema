@@ -37,15 +37,15 @@
   version = "v1.10.0"
 
 [[projects]]
-  digest = "1:341de7485bb546670cca536c43bd03650384ac11734e718523aa85ffc48ce352"
+  digest = "1:eff27818c41081b0bcb38f69140e017551d1a2a7a4c04e88484f02614ae60ca2"
   name = "github.com/rebel-l/go-utils"
   packages = [
     "array",
     "osutils",
   ]
   pruneopts = "UT"
-  revision = "2c15f288b31db8c647f5b8185f893945b886c6ab"
-  version = "0.2.0"
+  revision = "d91598d5b48b1c862cbb4dbf1b1292a4c0a474bc"
+  version = "0.3.0"
 
 [[projects]]
   digest = "1:87c2e02fb01c27060ccc5ba7c5a407cc91147726f8f40b70cceeedbc52b1f3a8"
@@ -61,18 +61,18 @@
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "UT"
-  revision = "74369b46fc6756741c016591724fd1cb8e26845f"
+  revision = "ffb98f73852f696ea2bb21a617a5c4b3e067a439"
 
 [[projects]]
   branch = "master"
-  digest = "1:0d703f14f9bbbe1070ff0ce86d749dcbc9d68fb0ae554252c09bd4bb37a072e7"
+  digest = "1:80200f57d482f61334a482a046ddedbad77c04dbec6ab81a4e1b3c6adbdfadef"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "d0b11bdaac8adb652bff00e49bcacf992835621a"
+  revision = "cd391775e71e684db52b63df9affd58269495083"
 
 [solve-meta]
   analyzer-name = "dep"
