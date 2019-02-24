@@ -29,6 +29,14 @@
   version = "v1.0.1"
 
 [[projects]]
+  digest = "1:0356f3312c9bd1cbeda81505b7fd437501d8e778ab66998ef69f00d7f9b3a0d7"
+  name = "github.com/mattn/go-runewidth"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3ee7d812e62a0804a7d0a324e0249ca2db3476d3"
+  version = "v0.0.4"
+
+[[projects]]
   digest = "1:4a49346ca45376a2bba679ca0e83bec949d780d4e927931317904bad482943ec"
   name = "github.com/mattn/go-sqlite3"
   packages = ["."]
@@ -74,6 +82,14 @@
   pruneopts = "UT"
   revision = "cd391775e71e684db52b63df9affd58269495083"
 
+[[projects]]
+  digest = "1:94cad6e2359d57da6652e689189c5b6ef19f99db6304d2c41de54f6632e15143"
+  name = "gopkg.in/cheggaaa/pb.v1"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "1cc5bbe20449079337944d56292c7383510c534c"
+  version = "v1.0.27"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
@@ -84,6 +100,7 @@
     "github.com/rebel-l/go-utils/array",
     "github.com/rebel-l/go-utils/osutils",
     "github.com/sirupsen/logrus",
+    "gopkg.in/cheggaaa/pb.v1",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

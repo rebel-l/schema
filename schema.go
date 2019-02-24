@@ -6,11 +6,15 @@ package schema
 import (
 	"fmt"
 
+	"github.com/rebel-l/schema/bar"
+
 	"github.com/rebel-l/schema/initdb"
 	"github.com/rebel-l/schema/sqlfile"
 	"github.com/rebel-l/schema/store"
 
 	"github.com/sirupsen/logrus"
+
+	"gopkg.in/cheggaaa/pb.v1"
 )
 
 const (
@@ -39,12 +43,19 @@ type Applier interface {
 	ReInit() error
 }
 
+// Progressor provides methods to steer a progress bar
+type Progressor interface {
+	Increment() int
+	FinishPrint(msg string)
+}
+
 // Schema provides commands to organize your database schema
 type Schema struct {
-	logger   logrus.FieldLogger
-	Scripter Scripter
-	Applier  Applier
-	db       store.DatabaseConnector
+	logger      logrus.FieldLogger
+	Scripter    Scripter
+	Applier     Applier
+	progressBar bool
+	db          store.DatabaseConnector
 }
 
 // New returns a Schema struct
@@ -55,6 +66,11 @@ func New(logger logrus.FieldLogger, db store.DatabaseConnector) Schema {
 		Applier:  initdb.New(db),
 		db:       db,
 	}
+}
+
+// WithProgressBar activate the progress bar
+func (s *Schema) WithProgressBar() {
+	s.progressBar = true
 }
 
 // Execute applies all sql scripts for a given folder
@@ -98,7 +114,9 @@ func (s *Schema) upgrade(path string, version string) error {
 		return err
 	}
 
+	progressBar := s.startProgressBar(len(files))
 	for _, f := range files {
+		progressBar.Increment()
 		if executedScripts.ScriptExecuted(f) {
 			continue
 		}
@@ -116,6 +134,7 @@ func (s *Schema) upgrade(path string, version string) error {
 			return err
 		}
 	}
+	progressBar.FinishPrint("Schema upgrade finished!")
 	return nil
 }
 
@@ -139,7 +158,12 @@ func (s *Schema) revert(path string, numOfScripts int) error {
 	}
 
 	counter := 0
+	progressBar := s.startProgressBar(numOfScripts)
+	if numOfScripts < 1 {
+		progressBar = s.startProgressBar(len(files))
+	}
 	for _, f := range files {
+		progressBar.Increment()
 		if !executedScripts.ScriptExecuted(f) {
 			continue
 		}
@@ -157,6 +181,7 @@ func (s *Schema) revert(path string, numOfScripts int) error {
 			break
 		}
 	}
+	progressBar.FinishPrint("Schema revert finished!")
 
 	return nil
 }
@@ -181,4 +206,12 @@ func checkDatabaseExists(db store.DatabaseConnector) bool {
 	}
 
 	return true
+}
+
+func (s *Schema) startProgressBar(count int) Progressor {
+	if s.progressBar {
+		return pb.StartNew(count)
+	}
+
+	return &bar.BlackHole{}
 }

@@ -22,27 +22,47 @@ import (
 )
 
 func TestSchema_Execute_CommandUpgrade_Happy(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
+	testCases := []struct {
+		name            string
+		withProgressBar bool
+	}{
+		{
+			name: "without progress bar",
+		},
+		{
+			name:            "with progress bar",
+			withProgressBar: true,
+		},
+	}
 
-	mockDB := getMockDB(ctrl, false)
-	mockDB.EXPECT().Select(gomock.Any(), gomock.Any()).Times(1).Return(errors.New("failed"))
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
 
-	mockApplier := schema_mock.NewMockApplier(ctrl)
-	mockApplier.EXPECT().Init().Times(1).Return(nil)
-	mockApplier.EXPECT().ApplyScript(gomock.Eq("./tests/data/schema/unit/001.sql")).Times(1).Return(nil)
-	mockApplier.EXPECT().ApplyScript(gomock.Eq("./tests/data/schema/unit/002.sql")).Times(1).Return(nil)
+			mockDB := getMockDB(ctrl, false)
+			mockDB.EXPECT().Select(gomock.Any(), gomock.Any()).Times(1).Return(errors.New("failed"))
 
-	mockScripter := schema_mock.NewMockScripter(ctrl)
-	mockScripter.EXPECT().GetAll().Times(1).Return(store.SchemaScriptCollection{}, nil)
-	mockScripter.EXPECT().Add(gomock.Any()).Times(2).Return(nil)
+			mockApplier := schema_mock.NewMockApplier(ctrl)
+			mockApplier.EXPECT().Init().Times(1).Return(nil)
+			mockApplier.EXPECT().ApplyScript(gomock.Eq("./tests/data/schema/unit/001.sql")).Times(1).Return(nil)
+			mockApplier.EXPECT().ApplyScript(gomock.Eq("./tests/data/schema/unit/002.sql")).Times(1).Return(nil)
 
-	s := schema.New(getMockLogger(ctrl, true), mockDB)
-	s.Applier = mockApplier
-	s.Scripter = mockScripter
+			mockScripter := schema_mock.NewMockScripter(ctrl)
+			mockScripter.EXPECT().GetAll().Times(1).Return(store.SchemaScriptCollection{}, nil)
+			mockScripter.EXPECT().Add(gomock.Any()).Times(2).Return(nil)
 
-	if err := s.Execute("./tests/data/schema/unit", schema.CommandUpgrade, ""); err != nil {
-		t.Errorf("Expected no errors but got %s", err)
+			s := schema.New(getMockLogger(ctrl, true), mockDB)
+			if testCase.withProgressBar {
+				s.WithProgressBar()
+			}
+			s.Applier = mockApplier
+			s.Scripter = mockScripter
+
+			if err := s.Execute("./tests/data/schema/unit", schema.CommandUpgrade, ""); err != nil {
+				t.Errorf("Expected no errors but got %s", err)
+			}
+		})
 	}
 }
 
