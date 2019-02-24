@@ -36,6 +36,7 @@ type Applier interface {
 	ApplyScript(fileName string) error
 	RevertScript(fileName string) error
 	Init() error
+	ReInit() error
 }
 
 // Schema provides commands to organize your database schema
@@ -166,8 +167,10 @@ func (s *Schema) recreate(path string, version string) error {
 		return err
 	}
 
-	err = s.upgrade(path, version)
-	return err
+	if err = s.Applier.ReInit(); err != nil {
+		return err
+	}
+	return s.upgrade(path, version)
 }
 
 func checkDatabaseExists(db store.DatabaseConnector) bool {

@@ -61,6 +61,20 @@ func (mr *MockApplierMockRecorder) Init() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Init", reflect.TypeOf((*MockApplier)(nil).Init))
 }
 
+// ReInit mocks base method
+func (m *MockApplier) ReInit() error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ReInit")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ReInit indicates an expected call of ReInit
+func (mr *MockApplierMockRecorder) ReInit() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReInit", reflect.TypeOf((*MockApplier)(nil).ReInit))
+}
+
 // RevertScript mocks base method
 func (m *MockApplier) RevertScript(arg0 string) error {
 	m.ctrl.T.Helper()

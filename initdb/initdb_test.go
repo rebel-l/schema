@@ -291,7 +291,7 @@ func TestInitDB_ReInit_Integration_Happy(t *testing.T) {
 	}
 
 	if len(counter) == 0 || counter[0] != 1 {
-		t.Error("Prepare: not able to select from table")
+		t.Fatalf("expected number of %d rows but got %d", 1, counter[0])
 	}
 
 	// now the test
@@ -299,11 +299,12 @@ func TestInitDB_ReInit_Integration_Happy(t *testing.T) {
 		t.Fatalf("Failed to reinit: %s", err)
 	}
 
+	counter = make([]uint32, 0)
 	if err = db.Select(&counter, q); err != nil {
 		t.Fatalf("not able count rows in table: %s", err)
 	}
 
 	if len(counter) == 0 || counter[0] != 0 {
-		t.Error("not able to select from table")
+		t.Errorf("expected number of %d rows but got %d", 0, counter[0])
 	}
 }

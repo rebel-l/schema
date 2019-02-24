@@ -219,6 +219,31 @@ func TestSchema_Execute_CommandRevert_Unhappy_RemoveError(t *testing.T) {
 	}
 }
 
+func TestSchema_Execute_CommandRecreate_Unhappy_ReInitError(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockApplier := schema_mock.NewMockApplier(ctrl)
+	mockApplier.EXPECT().RevertScript("./tests/data/schema/unit/002.sql").Return(nil)
+	mockApplier.EXPECT().ReInit().Return(errors.New("failed to reinit db"))
+
+	mockScripter := schema_mock.NewMockScripter(ctrl)
+	res := store.SchemaScriptCollection{&store.SchemaScript{
+		ScriptName: "./tests/data/schema/unit/002.sql",
+		Status:     store.StatusSuccess,
+	}}
+	mockScripter.EXPECT().GetAll().Times(1).Return(res, nil)
+	mockScripter.EXPECT().Remove(gomock.Any()).Return(nil)
+
+	s := schema.New(getMockLogger(ctrl, true), getMockDB(ctrl, true))
+	s.Applier = mockApplier
+	s.Scripter = mockScripter
+
+	if err := s.Execute("./tests/data/schema/unit", schema.CommandRecreate, ""); err == nil {
+		t.Error("Expected error is returned on failed recreate")
+	}
+}
+
 func TestSchema_Execute_Unhappy_NotExistingPath(t *testing.T) {
 	testCases := []struct {
 		name    string
@@ -367,8 +392,8 @@ func TestSchema_Execute_Integration_CommandUpgrade_Happy(t *testing.T) {
 	}
 
 	checkScriptTable(expected, data, t)
-	checkTable("something", db, t)
-	checkTable("something_new", db, t)
+	checkTable("something", db, t, 0)
+	checkTable("something_new", db, t, 0)
 }
 
 func TestSchema_Execute_Integration_CommandUpgrade_Happy_TwoSteps(t *testing.T) {
@@ -425,7 +450,7 @@ func step1(t *testing.T, db *sqlx.DB, s schema.Schema) store.SchemaScriptCollect
 	}
 
 	checkScriptTable(expected, data, t)
-	checkTable("something", db, t)
+	checkTable("something", db, t, 0)
 	return expected
 }
 
@@ -453,8 +478,129 @@ func step2(t *testing.T, db *sqlx.DB, s schema.Schema, expected store.SchemaScri
 		Status:     store.StatusSuccess,
 	})
 	checkScriptTable(expected, data, t)
-	checkTable("something", db, t)
-	checkTable("something_new", db, t)
+	checkTable("something", db, t, 0)
+	checkTable("something_new", db, t, 0)
+}
+
+func TestSchema_Execute_Integration_CommandRevert_Happy(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipped because of long running")
+	}
+
+	// prepare
+	log := logrus.New()
+	db, err := integration.GetDB("./tests/data/storage/schema_execute_revert.db")
+	if err != nil {
+		t.Fatalf("failed to init database: %s", err)
+	}
+	defer integration.ShutdownDB(db, t)
+
+	s := schema.New(log, db)
+	if err = s.Execute("./tests/data/schema/revert", schema.CommandUpgrade, ""); err != nil {
+		t.Fatalf("Expected no error but got %s", err)
+	}
+
+	data, err := s.Scripter.GetAll()
+	if err != nil {
+		t.Fatalf("not able get rows from table: %s", err)
+	}
+
+	expected := store.SchemaScriptCollection{
+		&store.SchemaScript{
+			ScriptName: "./tests/data/schema/revert/001.sql",
+			Status:     store.StatusSuccess,
+		},
+		&store.SchemaScript{
+			ScriptName: "./tests/data/schema/revert/002.sql",
+			Status:     store.StatusSuccess,
+		},
+	}
+
+	checkScriptTable(expected, data, t)
+	checkTable("something", db, t, 0)
+	checkTable("something_new", db, t, 0)
+
+	// now the test
+	if err = s.Execute("./tests/data/schema/revert", schema.CommandRevert, ""); err != nil {
+		t.Fatalf("not able to revert: %s", err)
+	}
+
+	data, err = s.Scripter.GetAll()
+	if err != nil {
+		t.Fatalf("not able get rows from table: %s", err)
+	}
+
+	expected = expected[:1]
+	checkScriptTable(expected, data, t)
+	checkTable("something", db, t, 0)
+}
+
+func TestSchema_Execute_Integration_CommandRecreate_Happy(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipped because of long running")
+	}
+
+	log := logrus.New()
+	db, err := integration.GetDB("./tests/data/storage/schema_execute_recreate.db")
+	if err != nil {
+		t.Fatalf("failed to init database: %s", err)
+	}
+	defer integration.ShutdownDB(db, t)
+
+	// prepare
+	s := schema.New(log, db)
+	if err = s.Execute("./tests/data/schema/recreate", schema.CommandUpgrade, ""); err != nil {
+		t.Fatalf("Prepare: failed to create data: %s", err)
+	}
+
+	expected := store.SchemaScriptCollection{
+		&store.SchemaScript{
+			ScriptName: "./tests/data/schema/recreate/001.sql",
+			Status:     store.StatusSuccess,
+		},
+		&store.SchemaScript{
+			ScriptName: "./tests/data/schema/recreate/002.sql",
+			Status:     store.StatusSuccess,
+		},
+		&store.SchemaScript{
+			ScriptName: "./tests/data/schema/recreate/003_fake.sql",
+			Status:     store.StatusSuccess,
+		},
+	}
+
+	m := store.NewSchemaScriptMapper(db)
+	if err = m.Add(expected[2]); err != nil {
+		t.Fatalf("Prepare: couldn't add fake script: %s", err)
+	}
+
+	data, err := s.Scripter.GetAll()
+	if err != nil {
+		t.Fatalf("Prepare: not able get rows from table: %s", err)
+	}
+
+	q := `INSERT INTO something (id) VALUES (1)`
+	if _, err = db.Exec(q); err != nil {
+		t.Fatalf("Prepare: failed to add data to table: %s", err)
+	}
+
+	checkScriptTable(expected, data, t)
+	checkTable("something", db, t, 1)
+	checkTable("something_new", db, t, 0)
+
+	// now the test
+	if err = s.Execute("./tests/data/schema/recreate", schema.CommandRecreate, ""); err != nil {
+		t.Fatalf("not able to recreate: %s", err)
+	}
+
+	data, err = s.Scripter.GetAll()
+	if err != nil {
+		t.Fatalf("not able get rows from table: %s", err)
+	}
+
+	expected = expected[0:2]
+	checkScriptTable(expected, data, t)
+	checkTable("something", db, t, 0)
+	checkTable("something_new", db, t, 0)
 }
 
 func checkScriptTable(expected store.SchemaScriptCollection, actual store.SchemaScriptCollection, t *testing.T) {
@@ -482,7 +628,7 @@ func checkScriptTable(expected store.SchemaScriptCollection, actual store.Schema
 	}
 }
 
-func checkTable(tableName string, db *sqlx.DB, t *testing.T) {
+func checkTable(tableName string, db *sqlx.DB, t *testing.T, expectedCount uint32) {
 	var counter []uint32
 	q := db.Rebind(fmt.Sprintf("SELECT count(id) FROM %s;", tableName))
 	err := db.Select(&counter, q)
@@ -490,8 +636,8 @@ func checkTable(tableName string, db *sqlx.DB, t *testing.T) {
 		t.Fatalf("not able count rows in table: %s", err)
 	}
 
-	if len(counter) == 0 || counter[0] != 0 {
-		t.Error("not able to select from table")
+	if len(counter) == 0 || counter[0] != expectedCount {
+		t.Errorf("expected number of %d rows in table '%s' but got %d", expectedCount, tableName, counter[0])
 	}
 }
 
@@ -516,10 +662,3 @@ func copyFile(src, dest string) error {
 	_, err = io.Copy(to, from)
 	return err
 }
-
-/*
-TODO:
-	Integration tests:
-		2. command revert happy
-		3. command recreate ==> later
-*/
