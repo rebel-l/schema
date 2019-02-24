@@ -68,6 +68,28 @@ func TestSchema_Execute_CommandUpgrade_Unhappy_GetAllError(t *testing.T) {
 	}
 }
 
+func TestSchema_Execute_CommandUpgrade_Unhappy_InitError(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockDB := getMockDB(ctrl, false)
+	mockDB.EXPECT().Select(gomock.Any(), gomock.Any()).Return(errors.New("failed"))
+
+	mockApplier := schema_mock.NewMockApplier(ctrl)
+	mockApplier.EXPECT().Init().Return(errors.New("failed init"))
+
+	mockScripter := schema_mock.NewMockScripter(ctrl)
+	mockScripter.EXPECT().GetAll().Times(0)
+
+	s := schema.New(getMockLogger(ctrl, true), mockDB)
+	s.Applier = mockApplier
+	s.Scripter = mockScripter
+
+	if err := s.Execute("./tests/data/schema/unit", schema.CommandUpgrade, ""); err == nil {
+		t.Error("Expected error is returned on failed database initialisation")
+	}
+}
+
 func TestSchema_Execute_CommandUpgrade_Unhappy_ApplyError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -217,6 +239,25 @@ func TestSchema_Execute_CommandRevert_Unhappy_RemoveError(t *testing.T) {
 
 	if err := s.Execute("./tests/data/schema/unit", schema.CommandRevert, ""); err == nil {
 		t.Error("Expected error is returned on failed remove")
+	}
+}
+
+func TestSchema_Execute_CommandRevert_Unhappy_GetAllError(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockApplier := schema_mock.NewMockApplier(ctrl)
+	mockApplier.EXPECT().RevertScript("./tests/data/schema/unit/002.sql").Times(0)
+
+	mockScripter := schema_mock.NewMockScripter(ctrl)
+	mockScripter.EXPECT().GetAll().Return(nil, errors.New("failed getting data"))
+
+	s := schema.New(getMockLogger(ctrl, true), getMockDB(ctrl, true))
+	s.Applier = mockApplier
+	s.Scripter = mockScripter
+
+	if err := s.Execute("./tests/data/schema/unit", schema.CommandRevert, ""); err == nil {
+		t.Error("Expected error is returned on failed operation to load data")
 	}
 }
 
