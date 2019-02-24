@@ -16,6 +16,9 @@ given folder. The following operations are provided:
 It requires Go 1.11 or higher. Lower versions might work but weren't tested.
 
 ## Supported Databases
+Every SQL database is supported which has a driver for [go](https://golang.org) and which is compatible with the built in
+package `"database/sql"` or the package `github.com/jmoiron/sqlx`. Originally it was developed for the following databases 
+so far:
 - sqlite3
 
 ## Write SQL Schema Script
