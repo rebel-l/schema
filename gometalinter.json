@@ -1,0 +1,12 @@
+{
+  "enable-all": true,
+  "concurrency": 2,
+  "warn-unmatched-nolint": true,
+  "debug": false,
+  "vendor": true,
+  "skip": [
+    "mocks",
+    "reports",
+    "scripts"
+  ]
+}

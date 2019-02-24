@@ -1,0 +1,12 @@
+-- up
+CREATE TABLE IF NOT EXISTS test (
+  id INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS another (
+  id INTEGER
+);
+
+-- down
+DROP TABLE IF EXISTS test;
+DROP TABLE IF EXISTS another;
