@@ -1,6 +1,8 @@
 package initdb
 
 import (
+	"fmt"
+
 	"github.com/rebel-l/schema/sqlfile"
 	"github.com/rebel-l/schema/store"
 )
@@ -63,4 +65,20 @@ func (i *InitDB) Init() error {
 	}
 
 	return nil
+}
+
+// ReInit drops created tables and execute Init() again
+func (i *InitDB) ReInit() error {
+	q := `DROP TABLE IF EXISTS %s;`
+	scripts := []string{
+		fmt.Sprintf(q, "schema_script"),
+	}
+
+	for _, q := range scripts {
+		if _, err := i.db.Exec(q); err != nil {
+			return err
+		}
+	}
+
+	return i.Init()
 }
