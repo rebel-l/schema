@@ -5,6 +5,7 @@
 
 [![Release](https://img.shields.io/github/release/rebel-l/schema.svg?label=Release)](https://github.com/rebel-l/schema/releases)
 [![GitHub issues](https://img.shields.io/github/issues/rebel-l/schema.svg)](https://github/rebel-l/schema/issues)
+[![Documentation](https://godoc.org/github.com/rebel-l/schema?status.svg)](https://godoc.org/github.com/rebel-l/schema)
 
 # Schema Package
 This library written in [go](https://golang.org) helps you to manage your database schema. It executes SQL scripts by a 
