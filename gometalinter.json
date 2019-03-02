@@ -3,6 +3,7 @@
   "concurrency": 2,
   "warn-unmatched-nolint": true,
   "debug": false,
+  "deadline": "60s",
   "vendor": true,
   "skip": [
     "mocks",

@@ -132,7 +132,7 @@ The only line which has changed is `s.Execute("./path_to_your_scripts", schema.C
 the command `schema.CommandRevert`.
 
 ### Usage: Recreate
-AS you can imagine from the examples above `recreate` the database is no big deal
+As you can imagine from the examples above `recreate` the database is no big deal
 
 ```go
 package main
@@ -188,3 +188,22 @@ func main() {
 	}
 }
 ``` 
+
+# Contributing to this Package
+You are welcome to contribute to this repository. Please ensure that you created an issue and push your changes in a
+feature branch.
+
+## Setup Local Environment
+At first you need to clone this repository and have [go](https://golang.org) installed. To get all the other necessary
+stuff just run 
+
+````bash
+./scripts/tools/setup.sh
+````
+
+NOTE: works also with Windows using `Git Bash`.
+
+The script installs:
+- dep (and all necessary go packages)
+- gometalinter (including all linters)
+- goconvey
