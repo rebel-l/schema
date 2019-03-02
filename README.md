@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 [![Release](https://img.shields.io/github/release/rebel-l/schema.svg?label=Release)](https://github.com/rebel-l/schema/releases)
-[![GitHub issues](https://img.shields.io/github/issues/rebel-l/schema.svg)](https://github/rebel-l/schema/issues)
+[![GitHub issues](https://img.shields.io/github/issues/rebel-l/schema.svg)](https://github.com/rebel-l/schema/issues)
 [![Documentation](https://godoc.org/github.com/rebel-l/schema?status.svg)](https://godoc.org/github.com/rebel-l/schema)
 
 # Schema Package
