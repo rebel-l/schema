@@ -1,3 +1,4 @@
+// Package initdb provides functionality to initialize your database
 package initdb
 
 import (

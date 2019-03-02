@@ -1,3 +1,4 @@
+// Package sqlfile manage the handling with sql files
 package sqlfile
 
 import (

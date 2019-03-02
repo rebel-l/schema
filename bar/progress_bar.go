@@ -1,3 +1,4 @@
+// Package bar provides a fake progress bar to be compatible with the Progressor interface of package schema
 package bar
 
 // BlackHole represents a progress bar with no output
