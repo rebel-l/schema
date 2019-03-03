@@ -207,3 +207,4 @@ The script installs:
 - dep (and all necessary go packages)
 - gometalinter (including all linters)
 - goconvey
+- git hooks

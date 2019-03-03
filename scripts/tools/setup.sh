@@ -54,3 +54,12 @@ gometalinter -i
 echo -en "\E[40;34m\033[1mInstall: goconvey\033[0m"
 echo
 go get github.com/smartystreets/goconvey
+
+# hooks
+echo -en "\E[40;34m\033[1mSetup: hooks\033[0m"
+echo
+cp ./scripts/hooks/* ./.git/hooks
+
+echo
+echo -en "\E[40;34m\033[1mSetup local environment done!\033[0m"
+echo
