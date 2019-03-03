@@ -1,3 +1,4 @@
+// Package integration provides functions to setup or tear down integration tests
 package integration
 
 import (
