@@ -57,7 +57,7 @@ dep ensure -add github.com/rebel-l/schema
 Alternately you can get it by go directly by calling
 
 ```bash
-go get github.com/rebel-l/schema
+go get -u github.com/rebel-l/schema
 ```
 
 ### Usage: Upgrade
