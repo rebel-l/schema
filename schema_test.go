@@ -400,7 +400,7 @@ func TestSchema_Execute_Integration_CommandUpgrade_Happy(t *testing.T) {
 		t.Skip("skipped because of long running")
 	}
 
-	db, err := integration.GetDB("./tests/data/storage/schema_execute_upgrade.db")
+	db, err := integration.GetDB("./testdata/tmp/schema_execute_upgrade.db")
 	if err != nil {
 		t.Fatalf("failed to init database: %s", err)
 	}
@@ -438,7 +438,7 @@ func TestSchema_Execute_Integration_CommandUpgrade_Happy_TwoSteps(t *testing.T) 
 		t.Skip("skipped because of long running")
 	}
 
-	db, err := integration.GetDB("./tests/data/storage/schema_execute_upgrade_twosteps.db")
+	db, err := integration.GetDB("./testdata/tmp/schema_execute_upgrade_twosteps.db")
 	if err != nil {
 		t.Fatalf("failed to init database: %s", err)
 	}
@@ -524,7 +524,7 @@ func TestSchema_Execute_Integration_CommandRevert_Happy(t *testing.T) {
 	}
 
 	// prepare
-	db, err := integration.GetDB("./tests/data/storage/schema_execute_revert.db")
+	db, err := integration.GetDB("./testdata/tmp/schema_execute_revert.db")
 	if err != nil {
 		t.Fatalf("failed to init database: %s", err)
 	}
@@ -575,7 +575,7 @@ func TestSchema_Execute_Integration_CommandRecreate_Happy(t *testing.T) {
 		t.Skip("skipped because of long running")
 	}
 
-	db, err := integration.GetDB("./tests/data/storage/schema_execute_recreate.db")
+	db, err := integration.GetDB("./testdata/tmp/schema_execute_recreate.db")
 	if err != nil {
 		t.Fatalf("failed to init database: %s", err)
 	}

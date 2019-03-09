@@ -19,7 +19,7 @@ func TestInitDB_ApplyScript_Integration_Happy(t *testing.T) {
 		t.Skip("skipped because of long running")
 	}
 
-	db, err := integration.InitDB("./../tests/data/storage/apply_script_integration.db")
+	db, err := integration.InitDB("./testdata/tmp/apply_script_integration.db")
 	if err != nil {
 		t.Fatalf("Failed to open database: %s", err)
 	}
@@ -90,7 +90,7 @@ func TestInitDB_RevertScript_Integration_Happy(t *testing.T) {
 		t.Skip("skipped because of long running")
 	}
 
-	db, err := integration.InitDB("./../tests/data/storage/revert_script_integration.db")
+	db, err := integration.InitDB("./testdata/tmp/revert_script_integration.db")
 	if err != nil {
 		t.Fatalf("Failed to open database: %s", err)
 	}
@@ -201,7 +201,7 @@ func TestInitDB_Init_Integration_Happy(t *testing.T) {
 		t.Skip("skipped because of long running")
 	}
 
-	db, err := integration.GetDB("./../tests/data/storage/init_integration.db")
+	db, err := integration.GetDB("./testdata/tmp/init_integration.db")
 	if err != nil {
 		t.Fatalf("not able to open database connection: %s", err)
 	}
@@ -267,7 +267,7 @@ func TestInitDB_ReInit_Integration_Happy(t *testing.T) {
 		t.Skip("skipped because of long running")
 	}
 
-	db, err := integration.GetDB("./../tests/data/storage/reinit_integration.db")
+	db, err := integration.GetDB("./testdata/tmp/reinit_integration.db")
 	if err != nil {
 		t.Fatalf("not able to open database connection: %s", err)
 	}

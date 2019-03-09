@@ -21,7 +21,7 @@ func TestSchemaScriptMapper_Add_Integration(t *testing.T) {
 	}
 	t.Parallel()
 
-	db, err := integration.InitDB("./../tests/data/storage/add_integration_tests.db")
+	db, err := integration.InitDB("./testdata/tmp/add_integration_tests.db")
 	if err != nil {
 		t.Fatalf("not able to open database connection: %s", err)
 	}
@@ -47,7 +47,7 @@ func TestSchemaScriptMapper_Remove_Integration(t *testing.T) {
 	}
 	t.Parallel()
 
-	db, err := integration.InitDB("./../tests/data/storage/remove_integration_tests.db")
+	db, err := integration.InitDB("./testdata/tmp/remove_integration_tests.db")
 	if err != nil {
 		t.Fatalf("not able to open database connection: %s", err)
 	}
@@ -92,22 +92,22 @@ func TestSchemaScriptMapper_GetByID_Integration(t *testing.T) {
 	}{
 		{
 			name:     "success entry",
-			dbFile:   "./../tests/data/storage/get_success_integration_tests.db",
+			dbFile:   "./testdata/tmp/get_success_integration_tests.db",
 			expected: store.NewSchemaScriptSuccess("success.sql", ""),
 		},
 		{
 			name:     "success entry with app version",
-			dbFile:   "./../tests/data/storage/get_success_with_app_version_integration_tests.db",
+			dbFile:   "./testdata/tmp/get_success_with_app_version_integration_tests.db",
 			expected: store.NewSchemaScriptSuccess("success.sql", "0.8.11"),
 		},
 		{
 			name:     "error entry",
-			dbFile:   "./../tests/data/storage/get_error_integration_tests.db",
+			dbFile:   "./testdata/tmp/get_error_integration_tests.db",
 			expected: store.NewSchemaScriptError("error.sql", "", "an error message"),
 		},
 		{
 			name:     "error entry with app version",
-			dbFile:   "./../tests/data/storage/get_error_with_app_version_integration_tests.db",
+			dbFile:   "./testdata/tmp/get_error_with_app_version_integration_tests.db",
 			expected: store.NewSchemaScriptError("error.sql", "master-20190212-2354", "an error message"),
 		},
 	}
@@ -173,7 +173,7 @@ func TestSchemaScriptMapper_GetAll_Integration(t *testing.T) {
 	}
 	t.Parallel()
 
-	db, err := integration.InitDB("./../tests/data/storage/getall_integration_tests.db")
+	db, err := integration.InitDB("./testdata/tmp/getall_integration_tests.db")
 	if err != nil {
 		t.Fatalf("not able to open database connection: %s", err)
 	}
