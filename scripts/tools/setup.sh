@@ -47,13 +47,13 @@ dep ensure
 # install gometalinters
 echo -en "\E[40;34m\033[1mInstall: gometalinter\033[0m"
 echo
-go get github.com/alecthomas/gometalinter
+go get -u github.com/alecthomas/gometalinter
 gometalinter -i
 
 # install goconvey
 echo -en "\E[40;34m\033[1mInstall: goconvey\033[0m"
 echo
-go get github.com/smartystreets/goconvey
+go get -u github.com/smartystreets/goconvey
 
 # hooks
 echo -en "\E[40;34m\033[1mSetup: hooks\033[0m"
