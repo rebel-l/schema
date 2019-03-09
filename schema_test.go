@@ -42,8 +42,8 @@ func TestSchema_Execute_CommandUpgrade_Happy(t *testing.T) {
 
 			mockApplier := schema_mock.NewMockApplier(ctrl)
 			mockApplier.EXPECT().Init().Times(1).Return(nil)
-			mockApplier.EXPECT().ApplyScript(gomock.Eq("./tests/data/schema/unit/001.sql")).Times(1).Return(nil)
-			mockApplier.EXPECT().ApplyScript(gomock.Eq("./tests/data/schema/unit/002.sql")).Times(1).Return(nil)
+			mockApplier.EXPECT().ApplyScript(gomock.Eq("./testdata/unit/001.sql")).Times(1).Return(nil)
+			mockApplier.EXPECT().ApplyScript(gomock.Eq("./testdata/unit/002.sql")).Times(1).Return(nil)
 
 			mockScripter := schema_mock.NewMockScripter(ctrl)
 			mockScripter.EXPECT().GetAll().Times(1).Return(store.SchemaScriptCollection{}, nil)
@@ -56,7 +56,7 @@ func TestSchema_Execute_CommandUpgrade_Happy(t *testing.T) {
 			s.Applier = mockApplier
 			s.Scripter = mockScripter
 
-			if err := s.Execute("./tests/data/schema/unit", schema.CommandUpgrade, ""); err != nil {
+			if err := s.Execute("./testdata/unit", schema.CommandUpgrade, ""); err != nil {
 				t.Errorf("Expected no errors but got %s", err)
 			}
 		})
@@ -80,7 +80,7 @@ func TestSchema_Execute_CommandUpgrade_Unhappy_GetAllError(t *testing.T) {
 	s.Applier = mockApplier
 	s.Scripter = mockScripter
 
-	if err := s.Execute("./tests/data/schema/unit", schema.CommandUpgrade, ""); err == nil {
+	if err := s.Execute("./testdata/unit", schema.CommandUpgrade, ""); err == nil {
 		t.Error("Expected error is returned on failed database operation")
 	}
 }
@@ -102,7 +102,7 @@ func TestSchema_Execute_CommandUpgrade_Unhappy_InitError(t *testing.T) {
 	s.Applier = mockApplier
 	s.Scripter = mockScripter
 
-	if err := s.Execute("./tests/data/schema/unit", schema.CommandUpgrade, ""); err == nil {
+	if err := s.Execute("./testdata/unit", schema.CommandUpgrade, ""); err == nil {
 		t.Error("Expected error is returned on failed database initialisation")
 	}
 }
@@ -111,7 +111,7 @@ func TestSchema_Execute_CommandUpgrade_Unhappy_ApplyError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	expected := "failed to execute script ./tests/data/schema/unit/001.sql: failed apply"
+	expected := "failed to execute script ./testdata/unit/001.sql: failed apply"
 
 	mockDB := getMockDB(ctrl, false)
 	mockDB.EXPECT().Select(gomock.Any(), gomock.Any()).Times(1).Return(nil)
@@ -123,13 +123,13 @@ func TestSchema_Execute_CommandUpgrade_Unhappy_ApplyError(t *testing.T) {
 
 	mockApplier := schema_mock.NewMockApplier(ctrl)
 
-	mockApplier.EXPECT().ApplyScript("./tests/data/schema/unit/001.sql").Return(errors.New("failed apply"))
+	mockApplier.EXPECT().ApplyScript("./testdata/unit/001.sql").Return(errors.New("failed apply"))
 
 	s := schema.New(mockDB)
 	s.Applier = mockApplier
 	s.Scripter = mockScripter
 
-	err := s.Execute("./tests/data/schema/unit", schema.CommandUpgrade, "")
+	err := s.Execute("./testdata/unit", schema.CommandUpgrade, "")
 	if err == nil {
 		t.Error("Expected error is returned on failed apply")
 	}
@@ -154,13 +154,13 @@ func TestSchema_Execute_CommandUpgrade_Unhappy_AddError(t *testing.T) {
 	mockScripter.EXPECT().Add(gomock.Any()).Return(errors.New(expected))
 
 	mockApplier := schema_mock.NewMockApplier(ctrl)
-	mockApplier.EXPECT().ApplyScript("./tests/data/schema/unit/001.sql").Return(nil)
+	mockApplier.EXPECT().ApplyScript("./testdata/unit/001.sql").Return(nil)
 
 	s := schema.New(mockDB)
 	s.Applier = mockApplier
 	s.Scripter = mockScripter
 
-	err := s.Execute("./tests/data/schema/unit", schema.CommandUpgrade, "")
+	err := s.Execute("./testdata/unit", schema.CommandUpgrade, "")
 	if err == nil {
 		t.Error("Expected error is not returned on failed add")
 	}
@@ -176,7 +176,7 @@ func TestSchema_Execute_CommandUpgrade_Unhappy_ApplyErrorAddError(t *testing.T) 
 
 	errMsg1 := "failed apply"
 	errMsg2 := "failed add"
-	expected := "original error: failed to execute script ./tests/data/schema/unit/001.sql: failed apply, following error: failed add"
+	expected := "original error: failed to execute script ./testdata/unit/001.sql: failed apply, following error: failed add"
 
 	mockDB := getMockDB(ctrl, false)
 	mockDB.EXPECT().Select(gomock.Any(), gomock.Any()).Times(1).Return(nil)
@@ -187,13 +187,13 @@ func TestSchema_Execute_CommandUpgrade_Unhappy_ApplyErrorAddError(t *testing.T) 
 	mockScripter.EXPECT().Add(gomock.Any()).Return(errors.New(errMsg2))
 
 	mockApplier := schema_mock.NewMockApplier(ctrl)
-	mockApplier.EXPECT().ApplyScript("./tests/data/schema/unit/001.sql").Return(errors.New(errMsg1))
+	mockApplier.EXPECT().ApplyScript("./testdata/unit/001.sql").Return(errors.New(errMsg1))
 
 	s := schema.New(mockDB)
 	s.Applier = mockApplier
 	s.Scripter = mockScripter
 
-	err := s.Execute("./tests/data/schema/unit", schema.CommandUpgrade, "")
+	err := s.Execute("./testdata/unit", schema.CommandUpgrade, "")
 	if err == nil {
 		t.Error("Expected error is returned on failed apply")
 	}
@@ -208,11 +208,11 @@ func TestSchema_Execute_CommandRevert_Unhappy_RevertError(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockApplier := schema_mock.NewMockApplier(ctrl)
-	mockApplier.EXPECT().RevertScript("./tests/data/schema/unit/002.sql").Return(errors.New("failed"))
+	mockApplier.EXPECT().RevertScript("./testdata/unit/002.sql").Return(errors.New("failed"))
 
 	mockScripter := schema_mock.NewMockScripter(ctrl)
 	res := store.SchemaScriptCollection{&store.SchemaScript{
-		ScriptName: "./tests/data/schema/unit/002.sql",
+		ScriptName: "./testdata/unit/002.sql",
 		Status:     store.StatusSuccess,
 	}}
 	mockScripter.EXPECT().GetAll().Times(1).Return(res, nil)
@@ -221,7 +221,7 @@ func TestSchema_Execute_CommandRevert_Unhappy_RevertError(t *testing.T) {
 	s.Applier = mockApplier
 	s.Scripter = mockScripter
 
-	if err := s.Execute("./tests/data/schema/unit", schema.CommandRevert, ""); err == nil {
+	if err := s.Execute("./testdata/unit", schema.CommandRevert, ""); err == nil {
 		t.Error("Expected error is returned on failed revert")
 	}
 }
@@ -231,21 +231,21 @@ func TestSchema_Execute_CommandRevert_Unhappy_RemoveError(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockApplier := schema_mock.NewMockApplier(ctrl)
-	mockApplier.EXPECT().RevertScript("./tests/data/schema/unit/002.sql").Return(nil)
+	mockApplier.EXPECT().RevertScript("./testdata/unit/002.sql").Return(nil)
 
 	mockScripter := schema_mock.NewMockScripter(ctrl)
 	res := store.SchemaScriptCollection{&store.SchemaScript{
-		ScriptName: "./tests/data/schema/unit/002.sql",
+		ScriptName: "./testdata/unit/002.sql",
 		Status:     store.StatusSuccess,
 	}}
 	mockScripter.EXPECT().GetAll().Times(1).Return(res, nil)
-	mockScripter.EXPECT().Remove("./tests/data/schema/unit/002.sql").Return(errors.New("failed"))
+	mockScripter.EXPECT().Remove("./testdata/unit/002.sql").Return(errors.New("failed"))
 
 	s := schema.New(getMockDB(ctrl, true))
 	s.Applier = mockApplier
 	s.Scripter = mockScripter
 
-	if err := s.Execute("./tests/data/schema/unit", schema.CommandRevert, ""); err == nil {
+	if err := s.Execute("./testdata/unit", schema.CommandRevert, ""); err == nil {
 		t.Error("Expected error is returned on failed remove")
 	}
 }
@@ -255,7 +255,7 @@ func TestSchema_Execute_CommandRevert_Unhappy_GetAllError(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockApplier := schema_mock.NewMockApplier(ctrl)
-	mockApplier.EXPECT().RevertScript("./tests/data/schema/unit/002.sql").Times(0)
+	mockApplier.EXPECT().RevertScript("./testdata/unit/002.sql").Times(0)
 
 	mockScripter := schema_mock.NewMockScripter(ctrl)
 	mockScripter.EXPECT().GetAll().Return(nil, errors.New("failed getting data"))
@@ -264,7 +264,7 @@ func TestSchema_Execute_CommandRevert_Unhappy_GetAllError(t *testing.T) {
 	s.Applier = mockApplier
 	s.Scripter = mockScripter
 
-	if err := s.Execute("./tests/data/schema/unit", schema.CommandRevert, ""); err == nil {
+	if err := s.Execute("./testdata/unit", schema.CommandRevert, ""); err == nil {
 		t.Error("Expected error is returned on failed operation to load data")
 	}
 }
@@ -274,12 +274,12 @@ func TestSchema_Execute_CommandRecreate_Unhappy_ReInitError(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockApplier := schema_mock.NewMockApplier(ctrl)
-	mockApplier.EXPECT().RevertScript("./tests/data/schema/unit/002.sql").Return(nil)
+	mockApplier.EXPECT().RevertScript("./testdata/unit/002.sql").Return(nil)
 	mockApplier.EXPECT().ReInit().Return(errors.New("failed to reinit db"))
 
 	mockScripter := schema_mock.NewMockScripter(ctrl)
 	res := store.SchemaScriptCollection{&store.SchemaScript{
-		ScriptName: "./tests/data/schema/unit/002.sql",
+		ScriptName: "./testdata/unit/002.sql",
 		Status:     store.StatusSuccess,
 	}}
 	mockScripter.EXPECT().GetAll().Times(1).Return(res, nil)
@@ -289,7 +289,7 @@ func TestSchema_Execute_CommandRecreate_Unhappy_ReInitError(t *testing.T) {
 	s.Applier = mockApplier
 	s.Scripter = mockScripter
 
-	if err := s.Execute("./tests/data/schema/unit", schema.CommandRecreate, ""); err == nil {
+	if err := s.Execute("./testdata/unit", schema.CommandRecreate, ""); err == nil {
 		t.Error("Expected error is returned on failed recreate")
 	}
 }
@@ -407,7 +407,7 @@ func TestSchema_Execute_Integration_CommandUpgrade_Happy(t *testing.T) {
 	defer integration.ShutdownDB(db, t)
 
 	s := schema.New(db)
-	err = s.Execute("./tests/data/schema/upgrade", schema.CommandUpgrade, "")
+	err = s.Execute("./testdata/upgrade", schema.CommandUpgrade, "")
 	if err != nil {
 		t.Errorf("Expected no error but got %s", err)
 	}
@@ -419,11 +419,11 @@ func TestSchema_Execute_Integration_CommandUpgrade_Happy(t *testing.T) {
 
 	expected := store.SchemaScriptCollection{
 		&store.SchemaScript{
-			ScriptName: "./tests/data/schema/upgrade/001.sql",
+			ScriptName: "./testdata/upgrade/001.sql",
 			Status:     store.StatusSuccess,
 		},
 		&store.SchemaScript{
-			ScriptName: "./tests/data/schema/upgrade/002.sql",
+			ScriptName: "./testdata/upgrade/002.sql",
 			Status:     store.StatusSuccess,
 		},
 	}
@@ -450,11 +450,11 @@ func TestSchema_Execute_Integration_CommandUpgrade_Happy_TwoSteps(t *testing.T) 
 	step2(t, db, s, expected)
 
 	// cleanup
-	if err = os.Remove("./tests/data/schema/upgrade/two_steps/001.sql"); err != nil {
+	if err = os.Remove("./testdata/upgrade/two_steps/001.sql"); err != nil {
 		t.Fatalf("Cleanup files failed: %s", err)
 	}
 
-	if err = os.Remove("./tests/data/schema/upgrade/two_steps/002.sql"); err != nil {
+	if err = os.Remove("./testdata/upgrade/two_steps/002.sql"); err != nil {
 		t.Fatalf("Cleanup files failed: %s", err)
 	}
 }
@@ -464,11 +464,11 @@ func step1(t *testing.T, db *sqlx.DB, s schema.Schema) store.SchemaScriptCollect
 	/**
 	STEP 1
 	*/
-	if err = osutils.CopyFile("./tests/data/schema/upgrade/step1/001.sql", "./tests/data/schema/upgrade/two_steps/001.sql"); err != nil {
+	if err = osutils.CopyFile("./testdata/upgrade/step1/001.sql", "./testdata/upgrade/two_steps/001.sql"); err != nil {
 		t.Fatalf("failed to copy file: %s", err)
 	}
 
-	err = s.Execute("./tests/data/schema/upgrade/two_steps", schema.CommandUpgrade, "")
+	err = s.Execute("./testdata/upgrade/two_steps", schema.CommandUpgrade, "")
 	if err != nil {
 		t.Errorf("Expected no error but got %s", err)
 	}
@@ -480,7 +480,7 @@ func step1(t *testing.T, db *sqlx.DB, s schema.Schema) store.SchemaScriptCollect
 
 	expected := store.SchemaScriptCollection{
 		&store.SchemaScript{
-			ScriptName: "./tests/data/schema/upgrade/two_steps/001.sql",
+			ScriptName: "./testdata/upgrade/two_steps/001.sql",
 			Status:     store.StatusSuccess,
 		},
 	}
@@ -495,11 +495,11 @@ func step2(t *testing.T, db *sqlx.DB, s schema.Schema, expected store.SchemaScri
 	/**
 	STEP 2
 	*/
-	if err = osutils.CopyFile("./tests/data/schema/upgrade/step2/002.sql", "./tests/data/schema/upgrade/two_steps/002.sql"); err != nil {
+	if err = osutils.CopyFile("./testdata/upgrade/step2/002.sql", "./testdata/upgrade/two_steps/002.sql"); err != nil {
 		t.Fatalf("failed to copy file: %s", err)
 	}
 
-	err = s.Execute("./tests/data/schema/upgrade/two_steps", schema.CommandUpgrade, "")
+	err = s.Execute("./testdata/upgrade/two_steps", schema.CommandUpgrade, "")
 	if err != nil {
 		t.Errorf("Expected no error but got %s", err)
 	}
@@ -510,7 +510,7 @@ func step2(t *testing.T, db *sqlx.DB, s schema.Schema, expected store.SchemaScri
 	}
 
 	expected = append(expected, &store.SchemaScript{
-		ScriptName: "./tests/data/schema/upgrade/two_steps/002.sql",
+		ScriptName: "./testdata/upgrade/two_steps/002.sql",
 		Status:     store.StatusSuccess,
 	})
 	checkScriptTable(expected, data, t)
@@ -531,7 +531,7 @@ func TestSchema_Execute_Integration_CommandRevert_Happy(t *testing.T) {
 	defer integration.ShutdownDB(db, t)
 
 	s := schema.New(db)
-	if err = s.Execute("./tests/data/schema/revert", schema.CommandUpgrade, ""); err != nil {
+	if err = s.Execute("./testdata/revert", schema.CommandUpgrade, ""); err != nil {
 		t.Fatalf("Expected no error but got %s", err)
 	}
 
@@ -542,11 +542,11 @@ func TestSchema_Execute_Integration_CommandRevert_Happy(t *testing.T) {
 
 	expected := store.SchemaScriptCollection{
 		&store.SchemaScript{
-			ScriptName: "./tests/data/schema/revert/001.sql",
+			ScriptName: "./testdata/revert/001.sql",
 			Status:     store.StatusSuccess,
 		},
 		&store.SchemaScript{
-			ScriptName: "./tests/data/schema/revert/002.sql",
+			ScriptName: "./testdata/revert/002.sql",
 			Status:     store.StatusSuccess,
 		},
 	}
@@ -556,7 +556,7 @@ func TestSchema_Execute_Integration_CommandRevert_Happy(t *testing.T) {
 	checkTable("something_new", db, t, 0)
 
 	// now the test
-	if err = s.Execute("./tests/data/schema/revert", schema.CommandRevert, ""); err != nil {
+	if err = s.Execute("./testdata/revert", schema.CommandRevert, ""); err != nil {
 		t.Fatalf("not able to revert: %s", err)
 	}
 
@@ -583,21 +583,21 @@ func TestSchema_Execute_Integration_CommandRecreate_Happy(t *testing.T) {
 
 	// prepare
 	s := schema.New(db)
-	if err = s.Execute("./tests/data/schema/recreate", schema.CommandUpgrade, ""); err != nil {
+	if err = s.Execute("./testdata/recreate", schema.CommandUpgrade, ""); err != nil {
 		t.Fatalf("Prepare: failed to create data: %s", err)
 	}
 
 	expected := store.SchemaScriptCollection{
 		&store.SchemaScript{
-			ScriptName: "./tests/data/schema/recreate/001.sql",
+			ScriptName: "./testdata/recreate/001.sql",
 			Status:     store.StatusSuccess,
 		},
 		&store.SchemaScript{
-			ScriptName: "./tests/data/schema/recreate/002.sql",
+			ScriptName: "./testdata/recreate/002.sql",
 			Status:     store.StatusSuccess,
 		},
 		&store.SchemaScript{
-			ScriptName: "./tests/data/schema/recreate/003_fake.sql",
+			ScriptName: "./testdata/recreate/003_fake.sql",
 			Status:     store.StatusSuccess,
 		},
 	}
@@ -622,7 +622,7 @@ func TestSchema_Execute_Integration_CommandRecreate_Happy(t *testing.T) {
 	checkTable("something_new", db, t, 0)
 
 	// now the test
-	if err = s.Execute("./tests/data/schema/recreate", schema.CommandRecreate, ""); err != nil {
+	if err = s.Execute("./testdata/recreate", schema.CommandRecreate, ""); err != nil {
 		t.Fatalf("not able to recreate: %s", err)
 	}
 

@@ -26,7 +26,7 @@ func TestInitDB_ApplyScript_Integration_Happy(t *testing.T) {
 	defer integration.ShutdownDB(db, t)
 
 	in := initdb.New(db)
-	err = in.ApplyScript("./../tests/data/initdb/001.sql")
+	err = in.ApplyScript("./testdata/001.sql")
 	if err != nil {
 		t.Errorf("Expected no error but got %s", err)
 	}
@@ -61,7 +61,7 @@ func TestInitDB_ApplyScript_Integration_Unhappy(t *testing.T) {
 		},
 		{
 			name:       "database error",
-			scriptName: "./../tests/data/initdb/001.sql",
+			scriptName: "./testdata/001.sql",
 			expected:   "something happened",
 			dbErrorMsg: "something happened",
 		},
@@ -97,7 +97,7 @@ func TestInitDB_RevertScript_Integration_Happy(t *testing.T) {
 	defer integration.ShutdownDB(db, t)
 
 	in := initdb.New(db)
-	err = in.RevertScript("./../tests/data/initdb/001.sql")
+	err = in.RevertScript("./testdata/001.sql")
 	if err != nil {
 		t.Errorf("Expected no error but got %s", err)
 	}
@@ -128,7 +128,7 @@ func TestInitDB_RevertScript_Integration_Unhappy(t *testing.T) {
 		},
 		{
 			name:       "database error",
-			scriptName: "./../tests/data/initdb/001.sql",
+			scriptName: "./testdata/001.sql",
 			expected:   "something happened",
 			dbErrorMsg: "something happened",
 		},

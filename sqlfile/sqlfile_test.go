@@ -15,15 +15,15 @@ func TestScanHappy(t *testing.T) {
 	}{
 		{
 			name: "case1 with different files",
-			path: "./../tests/data/sqlfile/case1",
+			path: "./testdata/case1",
 			expected: []string{
-				"./../tests/data/sqlfile/case1/001_with_content.sql",
-				"./../tests/data/sqlfile/case1/004_some_more.sql",
+				"./testdata/case1/001_with_content.sql",
+				"./testdata/case1/004_some_more.sql",
 			},
 		},
 		{
 			name:     "case2 with no files",
-			path:     "./../tests/data/sqlfile/case2",
+			path:     "./testdata/case2",
 			expected: []string{},
 		},
 	}
@@ -57,15 +57,15 @@ func TestScanReverseHappy(t *testing.T) {
 	}{
 		{
 			name: "case1 with different files",
-			path: "./../tests/data/sqlfile/case1",
+			path: "./testdata/case1",
 			expected: []string{
-				"./../tests/data/sqlfile/case1/004_some_more.sql",
-				"./../tests/data/sqlfile/case1/001_with_content.sql",
+				"./testdata/case1/004_some_more.sql",
+				"./testdata/case1/001_with_content.sql",
 			},
 		},
 		{
 			name:     "case2 with no files",
-			path:     "./../tests/data/sqlfile/case2",
+			path:     "./testdata/case2",
 			expected: []string{},
 		},
 	}
@@ -116,7 +116,7 @@ DROP TABLE IF EXISTS another;`,
 
 	for _, testCase := range testCases {
 		t.Run(testCase.command, func(t *testing.T) {
-			fileName := "./../tests/data/sqlfile/Read/test.sql"
+			fileName := "./testdata/Read/test.sql"
 			actual, err := sqlfile.Read(fileName, testCase.command)
 			if err != nil {
 				t.Errorf("Expected that file name %s is readable but got %s", fileName, err)
