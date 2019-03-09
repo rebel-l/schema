@@ -74,7 +74,7 @@ func (s *Schema) Execute(path string, command string, version string) error {
 	var err error
 	switch command {
 	case CommandUpgrade:
-		err = s.upgrade(path, version)
+		err = s.Upgrade(path, version)
 	case CommandRevert:
 		err = s.revert(path, 1)
 	case CommandRecreate:
@@ -86,7 +86,11 @@ func (s *Schema) Execute(path string, command string, version string) error {
 	return err
 }
 
-func (s *Schema) upgrade(path string, version string) error {
+// Upgrade applies new scripts to the database or if executed the first time applies all
+// Parameters:
+// - path: the path to the sql scripts. applies only files with ending ".sql", sub folders are ignored
+// - version: the version of your application, use empty string to ignore it
+func (s *Schema) Upgrade(path string, version string) error {
 	if !checkDatabaseExists(s.db) {
 		if err := s.Applier.Init(); err != nil {
 			return err
@@ -130,7 +134,7 @@ func (s *Schema) upgrade(path string, version string) error {
 			return err
 		}
 	}
-	progressBar.FinishPrint("Schema upgrade finished!")
+	progressBar.FinishPrint("Schema Upgrade finished!")
 	return nil
 }
 
@@ -191,7 +195,7 @@ func (s *Schema) recreate(path string, version string) error {
 	if err = s.Applier.ReInit(); err != nil {
 		return err
 	}
-	return s.upgrade(path, version)
+	return s.Upgrade(path, version)
 }
 
 func checkDatabaseExists(db store.DatabaseConnector) bool {
