@@ -16,9 +16,6 @@ import (
 )
 
 const (
-	// CommandUpgrade is the command to apply the latest schema changes
-	CommandUpgrade = "upgrade"
-
 	// CommandRecreate is the command to recreate the schema
 	CommandRecreate = "recreate"
 
@@ -73,8 +70,6 @@ func (s *Schema) WithProgressBar() {
 func (s *Schema) Execute(path string, command string, version string) error {
 	var err error
 	switch command {
-	case CommandUpgrade:
-		err = s.Upgrade(path, version)
 	case CommandRevert:
 		err = s.revert(path, 1)
 	case CommandRecreate:

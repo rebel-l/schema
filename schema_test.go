@@ -294,21 +294,50 @@ func TestSchema_Execute_CommandRecreate_Unhappy_ReInitError(t *testing.T) {
 	}
 }
 
+func TestSchema_Upgrade_Unhappy_NotExistingPath(t *testing.T) {
+	testCases := []struct {
+		name string
+		path string
+	}{
+		{
+			name: "empty path - upgrade",
+		},
+		{
+			name: "path not exists - upgrade",
+			path: "not_existing_path",
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockScripter := schema_mock.NewMockScripter(ctrl)
+			mockScripter.EXPECT().GetAll().Times(1).Return(store.SchemaScriptCollection{}, nil)
+
+			s := schema.New(getMockDB(ctrl, true))
+			s.Scripter = mockScripter
+
+			mockDB := getMockDB(ctrl, false)
+			mockDB.EXPECT().Select(gomock.Any(), gomock.Any()).Times(1).Return(nil)
+
+			s = schema.New(mockDB)
+			s.Scripter = mockScripter
+
+			if err := s.Upgrade(testCase.path, ""); err == nil {
+				t.Errorf("Expected an error on call with not existing path")
+			}
+		})
+	}
+}
+
 func TestSchema_Execute_Unhappy_NotExistingPath(t *testing.T) {
 	testCases := []struct {
 		name    string
 		path    string
 		command string
 	}{
-		{
-			name:    "empty path - upgrade",
-			command: schema.CommandUpgrade,
-		},
-		{
-			name:    "path not exists - upgrade",
-			path:    "not_existing_path",
-			command: schema.CommandUpgrade,
-		},
 		{
 			name:    "empty path - revert",
 			command: schema.CommandRevert,
@@ -339,14 +368,6 @@ func TestSchema_Execute_Unhappy_NotExistingPath(t *testing.T) {
 
 			s := schema.New(getMockDB(ctrl, true))
 			s.Scripter = mockScripter
-
-			if testCase.command == schema.CommandUpgrade {
-				mockDB := getMockDB(ctrl, false)
-				mockDB.EXPECT().Select(gomock.Any(), gomock.Any()).Times(1).Return(nil)
-
-				s = schema.New(mockDB)
-				s.Scripter = mockScripter
-			}
 
 			if err := s.Execute(testCase.path, testCase.command, ""); err == nil {
 				t.Errorf("Expected an error on call with not existing path")
