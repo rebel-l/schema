@@ -18,7 +18,7 @@ import (
 	"github.com/golang/mock/gomock"
 )
 
-func TestSchema_Execute_CommandUpgrade_Happy(t *testing.T) {
+func TestSchema_Upgrade_Happy(t *testing.T) {
 	testCases := []struct {
 		name            string
 		withProgressBar bool
@@ -56,14 +56,14 @@ func TestSchema_Execute_CommandUpgrade_Happy(t *testing.T) {
 			s.Applier = mockApplier
 			s.Scripter = mockScripter
 
-			if err := s.Execute("./testdata/unit", schema.CommandUpgrade, ""); err != nil {
+			if err := s.Upgrade("./testdata/unit", ""); err != nil {
 				t.Errorf("Expected no errors but got %s", err)
 			}
 		})
 	}
 }
 
-func TestSchema_Execute_CommandUpgrade_Unhappy_GetAllError(t *testing.T) {
+func TestSchema_Upgrade_Unhappy_GetAllError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -80,12 +80,12 @@ func TestSchema_Execute_CommandUpgrade_Unhappy_GetAllError(t *testing.T) {
 	s.Applier = mockApplier
 	s.Scripter = mockScripter
 
-	if err := s.Execute("./testdata/unit", schema.CommandUpgrade, ""); err == nil {
+	if err := s.Upgrade("./testdata/unit", ""); err == nil {
 		t.Error("Expected error is returned on failed database operation")
 	}
 }
 
-func TestSchema_Execute_CommandUpgrade_Unhappy_InitError(t *testing.T) {
+func TestSchema_Upgrade_Unhappy_InitError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -102,12 +102,12 @@ func TestSchema_Execute_CommandUpgrade_Unhappy_InitError(t *testing.T) {
 	s.Applier = mockApplier
 	s.Scripter = mockScripter
 
-	if err := s.Execute("./testdata/unit", schema.CommandUpgrade, ""); err == nil {
+	if err := s.Upgrade("./testdata/unit", ""); err == nil {
 		t.Error("Expected error is returned on failed database initialisation")
 	}
 }
 
-func TestSchema_Execute_CommandUpgrade_Unhappy_ApplyError(t *testing.T) {
+func TestSchema_Upgrade_Unhappy_ApplyError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -129,7 +129,7 @@ func TestSchema_Execute_CommandUpgrade_Unhappy_ApplyError(t *testing.T) {
 	s.Applier = mockApplier
 	s.Scripter = mockScripter
 
-	err := s.Execute("./testdata/unit", schema.CommandUpgrade, "")
+	err := s.Upgrade("./testdata/unit", "")
 	if err == nil {
 		t.Error("Expected error is returned on failed apply")
 	}
@@ -139,7 +139,7 @@ func TestSchema_Execute_CommandUpgrade_Unhappy_ApplyError(t *testing.T) {
 	}
 }
 
-func TestSchema_Execute_CommandUpgrade_Unhappy_AddError(t *testing.T) {
+func TestSchema_Upgrade_Unhappy_AddError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -160,7 +160,7 @@ func TestSchema_Execute_CommandUpgrade_Unhappy_AddError(t *testing.T) {
 	s.Applier = mockApplier
 	s.Scripter = mockScripter
 
-	err := s.Execute("./testdata/unit", schema.CommandUpgrade, "")
+	err := s.Upgrade("./testdata/unit", "")
 	if err == nil {
 		t.Error("Expected error is not returned on failed add")
 	}
@@ -170,7 +170,7 @@ func TestSchema_Execute_CommandUpgrade_Unhappy_AddError(t *testing.T) {
 	}
 }
 
-func TestSchema_Execute_CommandUpgrade_Unhappy_ApplyErrorAddError(t *testing.T) {
+func TestSchema_Upgrade_Unhappy_ApplyErrorAddError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -193,7 +193,7 @@ func TestSchema_Execute_CommandUpgrade_Unhappy_ApplyErrorAddError(t *testing.T) 
 	s.Applier = mockApplier
 	s.Scripter = mockScripter
 
-	err := s.Execute("./testdata/unit", schema.CommandUpgrade, "")
+	err := s.Upgrade("./testdata/unit", "")
 	if err == nil {
 		t.Error("Expected error is returned on failed apply")
 	}
@@ -407,7 +407,7 @@ func TestSchema_Upgrage_Integration_Happy(t *testing.T) {
 	defer testdb.ShutdownDB(db, t)
 
 	s := schema.New(db)
-	err = s.Execute("./testdata/upgrade/happy", schema.CommandUpgrade, "")
+	err = s.Upgrade("./testdata/upgrade/happy", "")
 	if err != nil {
 		t.Errorf("Expected no error but got %s", err)
 	}
@@ -533,7 +533,7 @@ func TestSchema_Execute_Integration_CommandRevert_Happy(t *testing.T) {
 	defer testdb.ShutdownDB(db, t)
 
 	s := schema.New(db)
-	if err = s.Execute("./testdata/revert", schema.CommandUpgrade, ""); err != nil {
+	if err = s.Upgrade("./testdata/revert", ""); err != nil {
 		t.Fatalf("Expected no error but got %s", err)
 	}
 
@@ -586,7 +586,7 @@ func TestSchema_Execute_Integration_CommandRecreate_Happy(t *testing.T) {
 
 	// prepare
 	s := schema.New(db)
-	if err = s.Execute("./testdata/recreate", schema.CommandUpgrade, ""); err != nil {
+	if err = s.Upgrade("./testdata/recreate", ""); err != nil {
 		t.Fatalf("Prepare: failed to create data: %s", err)
 	}
 
