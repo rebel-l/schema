@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/rebel-l/schema/store"
-	"github.com/rebel-l/schema/tests/integration"
+	"github.com/rebel-l/schema/utils/testdb"
 )
 
 func equalDateTime(expected time.Time, actual time.Time) bool {
@@ -21,11 +21,11 @@ func TestSchemaScriptMapper_Add_Integration(t *testing.T) {
 	}
 	t.Parallel()
 
-	db, err := integration.InitDB("./testdata/tmp/add_integration_tests.db")
+	db, err := testdb.InitDB("./testdata/tmp/add_integration_tests.db")
 	if err != nil {
 		t.Fatalf("not able to open database connection: %s", err)
 	}
-	defer integration.ShutdownDB(db, t)
+	defer testdb.ShutdownDB(db, t)
 
 	// now the test
 	expected := store.NewSchemaScriptSuccess("some_script.sql", "0.5.2")
@@ -47,11 +47,11 @@ func TestSchemaScriptMapper_Remove_Integration(t *testing.T) {
 	}
 	t.Parallel()
 
-	db, err := integration.InitDB("./testdata/tmp/remove_integration_tests.db")
+	db, err := testdb.InitDB("./testdata/tmp/remove_integration_tests.db")
 	if err != nil {
 		t.Fatalf("not able to open database connection: %s", err)
 	}
-	defer integration.ShutdownDB(db, t)
+	defer testdb.ShutdownDB(db, t)
 
 	// init data
 	script := store.NewSchemaScriptSuccess("my.sql", "")
@@ -114,11 +114,11 @@ func TestSchemaScriptMapper_GetByID_Integration(t *testing.T) {
 
 	for _, testcase := range testcases {
 		t.Run(testcase.name, func(t *testing.T) {
-			db, err := integration.InitDB(testcase.dbFile)
+			db, err := testdb.InitDB(testcase.dbFile)
 			if err != nil {
 				t.Fatalf("not able to open database connection: %s", err)
 			}
-			defer integration.ShutdownDB(db, t)
+			defer testdb.ShutdownDB(db, t)
 
 			expected := testcase.expected
 			vm := store.NewSchemaScriptMapper(db)
@@ -173,11 +173,11 @@ func TestSchemaScriptMapper_GetAll_Integration(t *testing.T) {
 	}
 	t.Parallel()
 
-	db, err := integration.InitDB("./testdata/tmp/getall_integration_tests.db")
+	db, err := testdb.InitDB("./testdata/tmp/getall_integration_tests.db")
 	if err != nil {
 		t.Fatalf("not able to open database connection: %s", err)
 	}
-	defer integration.ShutdownDB(db, t)
+	defer testdb.ShutdownDB(db, t)
 
 	expected := []*store.SchemaScript{
 		store.NewSchemaScriptSuccess("success.sql", "0.7.3"),

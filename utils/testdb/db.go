@@ -1,5 +1,5 @@
-// Package integration provides functions to setup or tear down integration tests
-package integration
+// Package testdb provides functions to setup or tear down integration tests
+package testdb
 
 import (
 	"os"

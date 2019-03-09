@@ -13,7 +13,7 @@ import (
 	"github.com/rebel-l/schema/mocks/schema_mock"
 	"github.com/rebel-l/schema/mocks/store_mock"
 	"github.com/rebel-l/schema/store"
-	"github.com/rebel-l/schema/tests/integration"
+	"github.com/rebel-l/schema/utils/testdb"
 
 	"github.com/golang/mock/gomock"
 )
@@ -400,11 +400,11 @@ func TestSchema_Execute_Integration_CommandUpgrade_Happy(t *testing.T) {
 		t.Skip("skipped because of long running")
 	}
 
-	db, err := integration.GetDB("./testdata/tmp/schema_execute_upgrade.db")
+	db, err := testdb.GetDB("./testdata/tmp/schema_execute_upgrade.db")
 	if err != nil {
 		t.Fatalf("failed to init database: %s", err)
 	}
-	defer integration.ShutdownDB(db, t)
+	defer testdb.ShutdownDB(db, t)
 
 	s := schema.New(db)
 	err = s.Execute("./testdata/upgrade", schema.CommandUpgrade, "")
@@ -438,11 +438,11 @@ func TestSchema_Execute_Integration_CommandUpgrade_Happy_TwoSteps(t *testing.T) 
 		t.Skip("skipped because of long running")
 	}
 
-	db, err := integration.GetDB("./testdata/tmp/schema_execute_upgrade_twosteps.db")
+	db, err := testdb.GetDB("./testdata/tmp/schema_execute_upgrade_twosteps.db")
 	if err != nil {
 		t.Fatalf("failed to init database: %s", err)
 	}
-	defer integration.ShutdownDB(db, t)
+	defer testdb.ShutdownDB(db, t)
 
 	s := schema.New(db)
 
@@ -524,11 +524,11 @@ func TestSchema_Execute_Integration_CommandRevert_Happy(t *testing.T) {
 	}
 
 	// prepare
-	db, err := integration.GetDB("./testdata/tmp/schema_execute_revert.db")
+	db, err := testdb.GetDB("./testdata/tmp/schema_execute_revert.db")
 	if err != nil {
 		t.Fatalf("failed to init database: %s", err)
 	}
-	defer integration.ShutdownDB(db, t)
+	defer testdb.ShutdownDB(db, t)
 
 	s := schema.New(db)
 	if err = s.Execute("./testdata/revert", schema.CommandUpgrade, ""); err != nil {
@@ -575,11 +575,11 @@ func TestSchema_Execute_Integration_CommandRecreate_Happy(t *testing.T) {
 		t.Skip("skipped because of long running")
 	}
 
-	db, err := integration.GetDB("./testdata/tmp/schema_execute_recreate.db")
+	db, err := testdb.GetDB("./testdata/tmp/schema_execute_recreate.db")
 	if err != nil {
 		t.Fatalf("failed to init database: %s", err)
 	}
-	defer integration.ShutdownDB(db, t)
+	defer testdb.ShutdownDB(db, t)
 
 	// prepare
 	s := schema.New(db)
