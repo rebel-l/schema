@@ -203,7 +203,7 @@ func TestSchema_Upgrade_Unhappy_ApplyErrorAddError(t *testing.T) {
 	}
 }
 
-func TestSchema_Execute_CommandRevert_Unhappy_RevertError(t *testing.T) {
+func TestSchema_RevertLast_Unhappy_RevertError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -221,12 +221,12 @@ func TestSchema_Execute_CommandRevert_Unhappy_RevertError(t *testing.T) {
 	s.Applier = mockApplier
 	s.Scripter = mockScripter
 
-	if err := s.Execute("./testdata/unit", schema.CommandRevert, ""); err == nil {
+	if err := s.RevertLast("./testdata/unit"); err == nil {
 		t.Error("Expected error is returned on failed revert")
 	}
 }
 
-func TestSchema_Execute_CommandRevert_Unhappy_RemoveError(t *testing.T) {
+func TestSchema_RevertLast_Unhappy_RemoveError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -245,12 +245,12 @@ func TestSchema_Execute_CommandRevert_Unhappy_RemoveError(t *testing.T) {
 	s.Applier = mockApplier
 	s.Scripter = mockScripter
 
-	if err := s.Execute("./testdata/unit", schema.CommandRevert, ""); err == nil {
+	if err := s.RevertLast("./testdata/unit"); err == nil {
 		t.Error("Expected error is returned on failed remove")
 	}
 }
 
-func TestSchema_Execute_CommandRevert_Unhappy_GetAllError(t *testing.T) {
+func TestSchema_RevertLast_Unhappy_GetAllError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -264,7 +264,7 @@ func TestSchema_Execute_CommandRevert_Unhappy_GetAllError(t *testing.T) {
 	s.Applier = mockApplier
 	s.Scripter = mockScripter
 
-	if err := s.Execute("./testdata/unit", schema.CommandRevert, ""); err == nil {
+	if err := s.RevertLast("./testdata/unit"); err == nil {
 		t.Error("Expected error is returned on failed operation to load data")
 	}
 }
@@ -326,6 +326,38 @@ func TestSchema_Upgrade_Unhappy_NotExistingPath(t *testing.T) {
 			s.Scripter = mockScripter
 
 			if err := s.Upgrade(testCase.path, ""); err == nil {
+				t.Errorf("Expected an error on call with not existing path")
+			}
+		})
+	}
+}
+
+func TestSchema_RevertLast_Unhappy_NotExistingPath(t *testing.T) {
+	testCases := []struct {
+		name string
+		path string
+	}{
+		{
+			name: "empty path - revert",
+		},
+		{
+			name: "path not exists - revert",
+			path: "not_existing_path",
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockScripter := schema_mock.NewMockScripter(ctrl)
+			mockScripter.EXPECT().GetAll().Times(1).Return(store.SchemaScriptCollection{}, nil)
+
+			s := schema.New(getMockDB(ctrl, true))
+			s.Scripter = mockScripter
+
+			if err := s.RevertLast(testCase.path); err == nil {
 				t.Errorf("Expected an error on call with not existing path")
 			}
 		})
@@ -541,7 +573,7 @@ func step2(t *testing.T, db *sqlx.DB, s schema.Schema, expected store.SchemaScri
 	checkTable("something_new", db, t, 0)
 }
 
-func TestSchema_Execute_Integration_CommandRevert_Happy(t *testing.T) {
+func TestSchema_RevertLast_Integration_Happy(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipped because of long running")
 	}
@@ -580,7 +612,7 @@ func TestSchema_Execute_Integration_CommandRevert_Happy(t *testing.T) {
 	checkTable("something_new", db, t, 0)
 
 	// now the test
-	if err = s.Execute("./testdata/revert", schema.CommandRevert, ""); err != nil {
+	if err = s.RevertLast("./testdata/revert"); err != nil {
 		t.Fatalf("not able to revert: %s", err)
 	}
 
