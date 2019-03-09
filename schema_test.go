@@ -442,21 +442,23 @@ func TestSchema_Upgrade_Integration_Happy_TwoSteps(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to init database: %s", err)
 	}
-	defer testdb.ShutdownDB(db, t)
+	defer func() {
+		testdb.ShutdownDB(db, t)
+
+		// cleanup
+		if err = os.Remove("./testdata/upgrade/two_steps/001.sql"); err != nil {
+			t.Fatalf("Cleanup files failed: %s", err)
+		}
+
+		if err = os.Remove("./testdata/upgrade/two_steps/002.sql"); err != nil {
+			t.Fatalf("Cleanup files failed: %s", err)
+		}
+	}()
 
 	s := schema.New(db)
 
 	expected := step1(t, db, s)
 	step2(t, db, s, expected)
-
-	// cleanup
-	if err = os.Remove("./testdata/upgrade/two_steps/001.sql"); err != nil {
-		t.Fatalf("Cleanup files failed: %s", err)
-	}
-
-	if err = os.Remove("./testdata/upgrade/two_steps/002.sql"); err != nil {
-		t.Fatalf("Cleanup files failed: %s", err)
-	}
 }
 
 func step1(t *testing.T, db *sqlx.DB, s schema.Schema) store.SchemaScriptCollection {
