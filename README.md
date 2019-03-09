@@ -87,7 +87,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	s := schema.New(log, db)
+	s := schema.New(db)
 	if err = s.Execute("./path_to_your_scripts", schema.CommandUpgrade, "Application Version"); err != nil {
 		log.Fatal(err)
 	}
@@ -121,7 +121,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	s := schema.New(log, db)
+	s := schema.New(db)
 	if err = s.Execute("./path_to_your_scripts", schema.CommandRevert, ""); err != nil {
 		log.Fatal(err)
 	}
@@ -151,7 +151,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	s := schema.New(log, db)
+	s := schema.New(db)
 	if err = s.Execute("./path_to_your_scripts", schema.CommandRecreate, ""); err != nil {
 		log.Fatal(err)
 	}
@@ -181,7 +181,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	s := schema.New(log, db)
+	s := schema.New(db)
 	s.WithProgressBar()
 	if err = s.Execute("./path_to_your_scripts", schema.CommandUpgrade, "Application Version"); err != nil {
 		log.Fatal(err)

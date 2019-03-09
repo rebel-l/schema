@@ -10,15 +10,12 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/rebel-l/schema"
-	"github.com/rebel-l/schema/mocks/logrus_mock"
 	"github.com/rebel-l/schema/mocks/schema_mock"
 	"github.com/rebel-l/schema/mocks/store_mock"
 	"github.com/rebel-l/schema/store"
 	"github.com/rebel-l/schema/tests/integration"
 
 	"github.com/golang/mock/gomock"
-
-	"github.com/sirupsen/logrus"
 )
 
 func TestSchema_Execute_CommandUpgrade_Happy(t *testing.T) {
@@ -52,7 +49,7 @@ func TestSchema_Execute_CommandUpgrade_Happy(t *testing.T) {
 			mockScripter.EXPECT().GetAll().Times(1).Return(store.SchemaScriptCollection{}, nil)
 			mockScripter.EXPECT().Add(gomock.Any()).Times(2).Return(nil)
 
-			s := schema.New(getMockLogger(ctrl, true), mockDB)
+			s := schema.New(mockDB)
 			if testCase.withProgressBar {
 				s.WithProgressBar()
 			}
@@ -79,7 +76,7 @@ func TestSchema_Execute_CommandUpgrade_Unhappy_GetAllError(t *testing.T) {
 	mockScripter := schema_mock.NewMockScripter(ctrl)
 	mockScripter.EXPECT().GetAll().Times(1).Return(store.SchemaScriptCollection{}, errors.New("failed"))
 
-	s := schema.New(getMockLogger(ctrl, true), mockDB)
+	s := schema.New(mockDB)
 	s.Applier = mockApplier
 	s.Scripter = mockScripter
 
@@ -101,7 +98,7 @@ func TestSchema_Execute_CommandUpgrade_Unhappy_InitError(t *testing.T) {
 	mockScripter := schema_mock.NewMockScripter(ctrl)
 	mockScripter.EXPECT().GetAll().Times(0)
 
-	s := schema.New(getMockLogger(ctrl, true), mockDB)
+	s := schema.New(mockDB)
 	s.Applier = mockApplier
 	s.Scripter = mockScripter
 
@@ -114,10 +111,7 @@ func TestSchema_Execute_CommandUpgrade_Unhappy_ApplyError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	expected := "failed apply"
-
-	mockLogger := logrus_mock.NewMockFieldLogger(ctrl)
-	mockLogger.EXPECT().Errorf(gomock.Any(), gomock.Any(), gomock.Any())
+	expected := "failed to execute script ./tests/data/schema/unit/001.sql: failed apply"
 
 	mockDB := getMockDB(ctrl, false)
 	mockDB.EXPECT().Select(gomock.Any(), gomock.Any()).Times(1).Return(nil)
@@ -129,9 +123,9 @@ func TestSchema_Execute_CommandUpgrade_Unhappy_ApplyError(t *testing.T) {
 
 	mockApplier := schema_mock.NewMockApplier(ctrl)
 
-	mockApplier.EXPECT().ApplyScript("./tests/data/schema/unit/001.sql").Return(errors.New(expected))
+	mockApplier.EXPECT().ApplyScript("./tests/data/schema/unit/001.sql").Return(errors.New("failed apply"))
 
-	s := schema.New(mockLogger, mockDB)
+	s := schema.New(mockDB)
 	s.Applier = mockApplier
 	s.Scripter = mockScripter
 
@@ -151,9 +145,6 @@ func TestSchema_Execute_CommandUpgrade_Unhappy_AddError(t *testing.T) {
 
 	expected := "failed add"
 
-	mockLogger := logrus_mock.NewMockFieldLogger(ctrl)
-	mockLogger.EXPECT().Errorf(gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
-
 	mockDB := getMockDB(ctrl, false)
 	mockDB.EXPECT().Select(gomock.Any(), gomock.Any()).Times(1).Return(nil)
 
@@ -165,13 +156,13 @@ func TestSchema_Execute_CommandUpgrade_Unhappy_AddError(t *testing.T) {
 	mockApplier := schema_mock.NewMockApplier(ctrl)
 	mockApplier.EXPECT().ApplyScript("./tests/data/schema/unit/001.sql").Return(nil)
 
-	s := schema.New(mockLogger, mockDB)
+	s := schema.New(mockDB)
 	s.Applier = mockApplier
 	s.Scripter = mockScripter
 
 	err := s.Execute("./tests/data/schema/unit", schema.CommandUpgrade, "")
 	if err == nil {
-		t.Error("Expected error is returned on failed add")
+		t.Error("Expected error is not returned on failed add")
 	}
 
 	if err.Error() != expected {
@@ -183,12 +174,9 @@ func TestSchema_Execute_CommandUpgrade_Unhappy_ApplyErrorAddError(t *testing.T) 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	expected1 := "failed apply"
-	expected2 := "failed add"
-	final := "original error: failed apply, follow up error: failed add"
-
-	mockLogger := logrus_mock.NewMockFieldLogger(ctrl)
-	mockLogger.EXPECT().Errorf(gomock.Any(), gomock.Any(), gomock.Any())
+	errMsg1 := "failed apply"
+	errMsg2 := "failed add"
+	expected := "original error: failed to execute script ./tests/data/schema/unit/001.sql: failed apply, following error: failed add"
 
 	mockDB := getMockDB(ctrl, false)
 	mockDB.EXPECT().Select(gomock.Any(), gomock.Any()).Times(1).Return(nil)
@@ -196,12 +184,12 @@ func TestSchema_Execute_CommandUpgrade_Unhappy_ApplyErrorAddError(t *testing.T) 
 	mockScripter := schema_mock.NewMockScripter(ctrl)
 	res := store.SchemaScriptCollection{}
 	mockScripter.EXPECT().GetAll().Times(1).Return(res, nil)
-	mockScripter.EXPECT().Add(gomock.Any()).Return(errors.New(expected2))
+	mockScripter.EXPECT().Add(gomock.Any()).Return(errors.New(errMsg2))
 
 	mockApplier := schema_mock.NewMockApplier(ctrl)
-	mockApplier.EXPECT().ApplyScript("./tests/data/schema/unit/001.sql").Return(errors.New(expected1))
+	mockApplier.EXPECT().ApplyScript("./tests/data/schema/unit/001.sql").Return(errors.New(errMsg1))
 
-	s := schema.New(mockLogger, mockDB)
+	s := schema.New(mockDB)
 	s.Applier = mockApplier
 	s.Scripter = mockScripter
 
@@ -210,8 +198,8 @@ func TestSchema_Execute_CommandUpgrade_Unhappy_ApplyErrorAddError(t *testing.T) 
 		t.Error("Expected error is returned on failed apply")
 	}
 
-	if err.Error() != final {
-		t.Errorf("Expected error message '%s' but got '%s'", final, err.Error())
+	if err.Error() != expected {
+		t.Errorf("Expected error message '%s' but got '%s'", expected, err.Error())
 	}
 }
 
@@ -229,7 +217,7 @@ func TestSchema_Execute_CommandRevert_Unhappy_RevertError(t *testing.T) {
 	}}
 	mockScripter.EXPECT().GetAll().Times(1).Return(res, nil)
 
-	s := schema.New(getMockLogger(ctrl, true), getMockDB(ctrl, true))
+	s := schema.New(getMockDB(ctrl, true))
 	s.Applier = mockApplier
 	s.Scripter = mockScripter
 
@@ -253,7 +241,7 @@ func TestSchema_Execute_CommandRevert_Unhappy_RemoveError(t *testing.T) {
 	mockScripter.EXPECT().GetAll().Times(1).Return(res, nil)
 	mockScripter.EXPECT().Remove("./tests/data/schema/unit/002.sql").Return(errors.New("failed"))
 
-	s := schema.New(getMockLogger(ctrl, true), getMockDB(ctrl, true))
+	s := schema.New(getMockDB(ctrl, true))
 	s.Applier = mockApplier
 	s.Scripter = mockScripter
 
@@ -272,7 +260,7 @@ func TestSchema_Execute_CommandRevert_Unhappy_GetAllError(t *testing.T) {
 	mockScripter := schema_mock.NewMockScripter(ctrl)
 	mockScripter.EXPECT().GetAll().Return(nil, errors.New("failed getting data"))
 
-	s := schema.New(getMockLogger(ctrl, true), getMockDB(ctrl, true))
+	s := schema.New(getMockDB(ctrl, true))
 	s.Applier = mockApplier
 	s.Scripter = mockScripter
 
@@ -297,7 +285,7 @@ func TestSchema_Execute_CommandRecreate_Unhappy_ReInitError(t *testing.T) {
 	mockScripter.EXPECT().GetAll().Times(1).Return(res, nil)
 	mockScripter.EXPECT().Remove(gomock.Any()).Return(nil)
 
-	s := schema.New(getMockLogger(ctrl, true), getMockDB(ctrl, true))
+	s := schema.New(getMockDB(ctrl, true))
 	s.Applier = mockApplier
 	s.Scripter = mockScripter
 
@@ -349,14 +337,14 @@ func TestSchema_Execute_Unhappy_NotExistingPath(t *testing.T) {
 			mockScripter := schema_mock.NewMockScripter(ctrl)
 			mockScripter.EXPECT().GetAll().Times(1).Return(store.SchemaScriptCollection{}, nil)
 
-			s := schema.New(getMockLogger(ctrl, true), getMockDB(ctrl, true))
+			s := schema.New(getMockDB(ctrl, true))
 			s.Scripter = mockScripter
 
 			if testCase.command == schema.CommandUpgrade {
 				mockDB := getMockDB(ctrl, false)
 				mockDB.EXPECT().Select(gomock.Any(), gomock.Any()).Times(1).Return(nil)
 
-				s = schema.New(getMockLogger(ctrl, true), mockDB)
+				s = schema.New(mockDB)
 				s.Scripter = mockScripter
 			}
 
@@ -403,20 +391,8 @@ func getMockDB(ctrl *gomock.Controller, dummy bool) *store_mock.MockDatabaseConn
 	return db
 }
 
-func getMockLogger(ctrl *gomock.Controller, dummy bool) *logrus_mock.MockFieldLogger {
-	log := logrus_mock.NewMockFieldLogger(ctrl)
-	if dummy {
-		log.EXPECT().Error(gomock.Any()).Times(0)
-		log.EXPECT().Errorf(gomock.Any()).Times(0)
-
-		log.EXPECT().Fatal(gomock.Any()).Times(0)
-		log.EXPECT().Fatalf(gomock.Any()).Times(0)
-	}
-	return log
-}
-
 func getSchemaWithDummies(ctrl *gomock.Controller) schema.Schema {
-	return schema.New(getMockLogger(ctrl, true), getMockDB(ctrl, true))
+	return schema.New(getMockDB(ctrl, true))
 }
 
 func TestSchema_Execute_Integration_CommandUpgrade_Happy(t *testing.T) {
@@ -424,14 +400,13 @@ func TestSchema_Execute_Integration_CommandUpgrade_Happy(t *testing.T) {
 		t.Skip("skipped because of long running")
 	}
 
-	log := logrus.New()
 	db, err := integration.GetDB("./tests/data/storage/schema_execute_upgrade.db")
 	if err != nil {
 		t.Fatalf("failed to init database: %s", err)
 	}
 	defer integration.ShutdownDB(db, t)
 
-	s := schema.New(log, db)
+	s := schema.New(db)
 	err = s.Execute("./tests/data/schema/upgrade", schema.CommandUpgrade, "")
 	if err != nil {
 		t.Errorf("Expected no error but got %s", err)
@@ -463,14 +438,13 @@ func TestSchema_Execute_Integration_CommandUpgrade_Happy_TwoSteps(t *testing.T) 
 		t.Skip("skipped because of long running")
 	}
 
-	log := logrus.New()
 	db, err := integration.GetDB("./tests/data/storage/schema_execute_upgrade_twosteps.db")
 	if err != nil {
 		t.Fatalf("failed to init database: %s", err)
 	}
 	defer integration.ShutdownDB(db, t)
 
-	s := schema.New(log, db)
+	s := schema.New(db)
 
 	expected := step1(t, db, s)
 	step2(t, db, s, expected)
@@ -550,14 +524,13 @@ func TestSchema_Execute_Integration_CommandRevert_Happy(t *testing.T) {
 	}
 
 	// prepare
-	log := logrus.New()
 	db, err := integration.GetDB("./tests/data/storage/schema_execute_revert.db")
 	if err != nil {
 		t.Fatalf("failed to init database: %s", err)
 	}
 	defer integration.ShutdownDB(db, t)
 
-	s := schema.New(log, db)
+	s := schema.New(db)
 	if err = s.Execute("./tests/data/schema/revert", schema.CommandUpgrade, ""); err != nil {
 		t.Fatalf("Expected no error but got %s", err)
 	}
@@ -602,7 +575,6 @@ func TestSchema_Execute_Integration_CommandRecreate_Happy(t *testing.T) {
 		t.Skip("skipped because of long running")
 	}
 
-	log := logrus.New()
 	db, err := integration.GetDB("./tests/data/storage/schema_execute_recreate.db")
 	if err != nil {
 		t.Fatalf("failed to init database: %s", err)
@@ -610,7 +582,7 @@ func TestSchema_Execute_Integration_CommandRecreate_Happy(t *testing.T) {
 	defer integration.ShutdownDB(db, t)
 
 	// prepare
-	s := schema.New(log, db)
+	s := schema.New(db)
 	if err = s.Execute("./tests/data/schema/recreate", schema.CommandUpgrade, ""); err != nil {
 		t.Fatalf("Prepare: failed to create data: %s", err)
 	}

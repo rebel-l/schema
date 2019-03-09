@@ -4,15 +4,13 @@ package schema
 //go:generate mockgen -destination=mocks/schema_mock/schema_mock.go -package=schema_mock github.com/rebel-l/schema Applier,Scripter
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/rebel-l/schema/bar"
-
 	"github.com/rebel-l/schema/initdb"
 	"github.com/rebel-l/schema/sqlfile"
 	"github.com/rebel-l/schema/store"
-
-	"github.com/sirupsen/logrus"
 
 	"gopkg.in/cheggaaa/pb.v1"
 )
@@ -51,7 +49,6 @@ type Progressor interface {
 
 // Schema provides commands to organize your database schema
 type Schema struct {
-	logger      logrus.FieldLogger
 	Scripter    Scripter
 	Applier     Applier
 	progressBar bool
@@ -59,9 +56,8 @@ type Schema struct {
 }
 
 // New returns a Schema struct
-func New(logger logrus.FieldLogger, db store.DatabaseConnector) Schema {
+func New(db store.DatabaseConnector) Schema {
 	return Schema{
-		logger:   logger,
 		Scripter: store.NewSchemaScriptMapper(db),
 		Applier:  initdb.New(db),
 		db:       db,
@@ -122,12 +118,12 @@ func (s *Schema) upgrade(path string, version string) error {
 		}
 
 		if err = s.Applier.ApplyScript(f); err != nil {
-			s.logger.Errorf("failed to execute script %s: %s", f, err)
-			if err2 := s.Scripter.Add(store.NewSchemaScriptError(f, version, err.Error())); err2 != nil {
-				err = fmt.Errorf("original error: %s, follow up error: %s", err, err2)
+			msg := fmt.Sprintf("failed to execute script %s: %s", f, err)
+			if err := s.Scripter.Add(store.NewSchemaScriptError(f, version, err.Error())); err != nil {
+				msg = fmt.Sprintf("original error: %s, following error: %s", msg, err)
 			}
 
-			return err
+			return errors.New(msg)
 		}
 
 		if err = s.Scripter.Add(store.NewSchemaScriptSuccess(f, version)); err != nil {
