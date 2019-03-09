@@ -81,10 +81,9 @@ func (s *Schema) Execute(path string, command string, version string) error {
 	return err
 }
 
-// Upgrade applies new scripts to the database or if executed the first time applies all
-// Parameters:
-// - path: the path to the sql scripts. applies only files with ending ".sql", sub folders are ignored
-// - version: the version of your application, use empty string to ignore it
+// Upgrade applies new scripts to the database or if executed the first time applies all.
+// A path to the sql scripts needs to be provided. It applies only files with ending ".sql", sub folders are ignored.
+// The version of your application can be provided too, use empty string to ignore it.
 func (s *Schema) Upgrade(path string, version string) error {
 	if !checkDatabaseExists(s.db) {
 		if err := s.Applier.Init(); err != nil {
