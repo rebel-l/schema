@@ -371,15 +371,6 @@ func TestSchema_Execute_Unhappy_NotExistingPath(t *testing.T) {
 		command string
 	}{
 		{
-			name:    "empty path - revert",
-			command: schema.CommandRevert,
-		},
-		{
-			name:    "path not exists - revert",
-			path:    "not_existing_path",
-			command: schema.CommandRevert,
-		},
-		{
 			name:    "empty path - recreate",
 			command: schema.CommandRecreate,
 		},

@@ -18,9 +18,6 @@ import (
 const (
 	// CommandRecreate is the command to recreate the schema
 	CommandRecreate = "recreate"
-
-	// CommandRevert is the command to rollback database to previous version
-	CommandRevert = "revert"
 )
 
 // Scripter provides methods to manage the access to log of SQL script executions
@@ -70,8 +67,6 @@ func (s *Schema) WithProgressBar() {
 func (s *Schema) Execute(path string, command string, version string) error {
 	var err error
 	switch command {
-	case CommandRevert:
-		err = s.RevertLast(path)
 	case CommandRecreate:
 		err = s.recreate(path, version)
 	default:
