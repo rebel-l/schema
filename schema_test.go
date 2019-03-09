@@ -470,7 +470,7 @@ func step1(t *testing.T, db *sqlx.DB, s schema.Schema) store.SchemaScriptCollect
 		t.Fatalf("failed to copy file: %s", err)
 	}
 
-	err = s.Execute("./testdata/upgrade/two_steps", schema.CommandUpgrade, "")
+	err = s.Upgrade("./testdata/upgrade/two_steps", "")
 	if err != nil {
 		t.Errorf("Expected no error but got %s", err)
 	}
@@ -501,7 +501,7 @@ func step2(t *testing.T, db *sqlx.DB, s schema.Schema, expected store.SchemaScri
 		t.Fatalf("failed to copy file: %s", err)
 	}
 
-	err = s.Execute("./testdata/upgrade/two_steps", schema.CommandUpgrade, "")
+	err = s.Upgrade("./testdata/upgrade/two_steps", "")
 	if err != nil {
 		t.Errorf("Expected no error but got %s", err)
 	}
