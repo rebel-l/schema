@@ -395,7 +395,7 @@ func getSchemaWithDummies(ctrl *gomock.Controller) schema.Schema {
 	return schema.New(getMockDB(ctrl, true))
 }
 
-func TestSchema_Execute_Integration_CommandUpgrade_Happy(t *testing.T) {
+func TestSchema_Upgrage_Integration_Happy(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipped because of long running")
 	}
@@ -407,7 +407,7 @@ func TestSchema_Execute_Integration_CommandUpgrade_Happy(t *testing.T) {
 	defer testdb.ShutdownDB(db, t)
 
 	s := schema.New(db)
-	err = s.Execute("./testdata/upgrade", schema.CommandUpgrade, "")
+	err = s.Execute("./testdata/upgrade/happy", schema.CommandUpgrade, "")
 	if err != nil {
 		t.Errorf("Expected no error but got %s", err)
 	}
@@ -419,21 +419,21 @@ func TestSchema_Execute_Integration_CommandUpgrade_Happy(t *testing.T) {
 
 	expected := store.SchemaScriptCollection{
 		&store.SchemaScript{
-			ScriptName: "./testdata/upgrade/001.sql",
+			ScriptName: "./testdata/upgrade/happy/001.sql",
 			Status:     store.StatusSuccess,
 		},
 		&store.SchemaScript{
-			ScriptName: "./testdata/upgrade/002.sql",
+			ScriptName: "./testdata/upgrade/happy/002.sql",
 			Status:     store.StatusSuccess,
 		},
 	}
 
-	checkScriptTable(expected, data, t)
+	checkScriptTable("TestSchema_Upgrage_Integration_Happy", expected, data, t)
 	checkTable("something", db, t, 0)
 	checkTable("something_new", db, t, 0)
 }
 
-func TestSchema_Execute_Integration_CommandUpgrade_Happy_TwoSteps(t *testing.T) {
+func TestSchema_Upgrade_Integration_Happy_TwoSteps(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipped because of long running")
 	}
@@ -485,7 +485,7 @@ func step1(t *testing.T, db *sqlx.DB, s schema.Schema) store.SchemaScriptCollect
 		},
 	}
 
-	checkScriptTable(expected, data, t)
+	checkScriptTable("TestSchema_Upgrade_Integration_Happy_TwoSteps - Step 1", expected, data, t)
 	checkTable("something", db, t, 0)
 	return expected
 }
@@ -513,7 +513,7 @@ func step2(t *testing.T, db *sqlx.DB, s schema.Schema, expected store.SchemaScri
 		ScriptName: "./testdata/upgrade/two_steps/002.sql",
 		Status:     store.StatusSuccess,
 	})
-	checkScriptTable(expected, data, t)
+	checkScriptTable("TestSchema_Upgrade_Integration_Happy_TwoSteps - Step 2", expected, data, t)
 	checkTable("something", db, t, 0)
 	checkTable("something_new", db, t, 0)
 }
@@ -551,7 +551,8 @@ func TestSchema_Execute_Integration_CommandRevert_Happy(t *testing.T) {
 		},
 	}
 
-	checkScriptTable(expected, data, t)
+	testName := "TestSchema_Execute_Integration_CommandRevert_Happy"
+	checkScriptTable(testName, expected, data, t)
 	checkTable("something", db, t, 0)
 	checkTable("something_new", db, t, 0)
 
@@ -566,7 +567,7 @@ func TestSchema_Execute_Integration_CommandRevert_Happy(t *testing.T) {
 	}
 
 	expected = expected[:1]
-	checkScriptTable(expected, data, t)
+	checkScriptTable(testName, expected, data, t)
 	checkTable("something", db, t, 0)
 }
 
@@ -617,7 +618,8 @@ func TestSchema_Execute_Integration_CommandRecreate_Happy(t *testing.T) {
 		t.Fatalf("Prepare: failed to add data to table: %s", err)
 	}
 
-	checkScriptTable(expected, data, t)
+	testName := "TestSchema_Execute_Integration_CommandRecreate_Happy"
+	checkScriptTable(testName, expected, data, t)
 	checkTable("something", db, t, 1)
 	checkTable("something_new", db, t, 0)
 
@@ -632,32 +634,32 @@ func TestSchema_Execute_Integration_CommandRecreate_Happy(t *testing.T) {
 	}
 
 	expected = expected[0:2]
-	checkScriptTable(expected, data, t)
+	checkScriptTable(testName, expected, data, t)
 	checkTable("something", db, t, 0)
 	checkTable("something_new", db, t, 0)
 }
 
-func checkScriptTable(expected store.SchemaScriptCollection, actual store.SchemaScriptCollection, t *testing.T) {
+func checkScriptTable(testName string, expected store.SchemaScriptCollection, actual store.SchemaScriptCollection, t *testing.T) {
 	if len(expected) != len(actual) {
-		t.Fatalf("Expeted %d rows in table but got %d", len(expected), len(actual))
+		t.Fatalf("%s: Expeted %d rows in table but got %d", testName, len(expected), len(actual))
 	}
 
 	for i, v := range expected {
 		w := actual[i]
 		if v.ScriptName != w.ScriptName {
-			t.Errorf("Expected script name %s but got %s", v.ScriptName, w.ScriptName)
+			t.Errorf("%s: Expected script name %s but got %s", testName, v.ScriptName, w.ScriptName)
 		}
 
 		if v.Status != w.Status {
-			t.Errorf("Expected status %s but got %s", v.Status, w.Status)
+			t.Errorf("%s: Expected status %s but got %s", testName, v.Status, w.Status)
 		}
 
 		if v.ErrorMsg != w.ErrorMsg {
-			t.Errorf("Expected error message %s but got %s", v.ErrorMsg, w.ErrorMsg)
+			t.Errorf("%s Expected error message %s but got %s", testName, v.ErrorMsg, w.ErrorMsg)
 		}
 
 		if v.AppVersion != w.AppVersion {
-			t.Errorf("Expected app version %s but got %s", v.AppVersion, w.AppVersion)
+			t.Errorf("%s: Expected app version %s but got %s", testName, v.AppVersion, w.AppVersion)
 		}
 	}
 }
