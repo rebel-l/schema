@@ -10,11 +10,11 @@
 # Schema Package
 This library written in [go](https://golang.org) helps you to manage your database schema. It executes SQL scripts by a 
 given folder. The following operations are provided:
-- **upgrade**: applies new scripts which has not been executed successfully yet or executes everything from scratch.
-- **revert**: reverts latest script. If you execute more than once, it takes the second latest, third latest and so on.
-- **recreate**: resets the database by reverting all executed scripts and recreates it from scratch by using upgrade.
+- **Upgrade**: applies new scripts which has not been executed successfully yet or executes everything from scratch.
+- **RevertLast**: reverts latest script. If you execute more than once, it takes the second latest, third latest and so on.
+- **Recreate**: resets the database by reverting all executed scripts and recreates it from scratch by using upgrade.
 
-It requires Go 1.11 or higher. Lower versions might work but weren't tested.
+It requires Go 1.11 or higher. Earlier versions might work but weren't tested.
 
 ## Supported Databases
 Every SQL database is supported which has a driver for [go](https://golang.org) and which is compatible with the built in
@@ -24,7 +24,7 @@ so far:
 
 ## Write SQL Schema Script
 Each script must have at least an `up` and a `down` command represented by the following SQL comments: `-- up` / `-- down`.
-You can skip the down command but beware that you `revert` and `recreate` are not working. As an example a schema script
+You can skip the down command but beware that `revert` and `recreate` are not working. As an example a schema script
 can look like the following (name: _001_example.sql_):
 
 ```sql
@@ -61,14 +61,13 @@ go get -u github.com/rebel-l/schema
 ```
 
 ### Usage: Upgrade
-The library makes the usage as simple as possible. There is only a method called _Execute_ which receives the follwoing 
-parameters:
+The library makes the usage as simple as possible. It provides a struct `Schema` containing a database connection. 
+To apply new scripts you only need to call `Upgrade()` and provide the following parameters:
 - **path**: the path to your SQL scripts
-- **command**: the command can be `upgrade`, `revert` or `recreate`
 - **application version**: if you want you can set this value to version of your application to which the not applied 
 scripts belong to. If you want to skip this, use a blank string `""` 
  
-To `upgrade` (includes also **creation**) your database you can do
+`Upgrade` includes also **creation** of your database. Here is an example:
 
 ```go
 package main
@@ -77,28 +76,26 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/rebel-l/schema"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
-	log := logrus.New()
 	db, err := sqlx.Open("sqlite3", "database.db")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	s := schema.New(db)
-	if err = s.Execute("./path_to_your_scripts", schema.CommandUpgrade, "Application Version"); err != nil {
+	if err = s.Upgrade("./path_to_your_scripts", "Application Version"); err != nil {
 		log.Fatal(err)
 	}
 }
 ``` 
 
 The interesting part happens in the last 4 lines where we get the schema struct from `schema.New` and then apply the scripts
-with `s.Execute("./path_to_your_scripts", schema.CommandUpgrade, "Application Version")`. 
+with `s.Upgrade("./path_to_your_scripts", "Application Version")`. 
 
-As logger you can use of course different ones, but it is expected that they follow the `logrus.FieldLogger` interface.
-Instead of `sqlx` you can also the internal go `sql` or any other which follows the `store.DatabaseConnector` interface
+Instead of `sqlx` you can use the internal go `sql` or any other which follows the `store.DatabaseConnector` interface
 delivered with this _package_. 
 
 ### Usage: Revert
@@ -111,25 +108,24 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/rebel-l/schema"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
-	log := logrus.New()
 	db, err := sqlx.Open("sqlite3", "database.db")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	s := schema.New(db)
-	if err = s.Execute("./path_to_your_scripts", schema.CommandRevert, ""); err != nil {
+	if err = s.RevertLast("./path_to_your_scripts"); err != nil {
 		log.Fatal(err)
 	}
 }
 ```
 
-The only line which has changed is `s.Execute("./path_to_your_scripts", schema.CommandRevert, "")` where we just use 
-the command `schema.CommandRevert`.
+The only line which has changed is `s.RevertLast("./path_to_your_scripts")`. You have also the option to revert all scripts
+with `s.RevertAll("./path_to_your_scripts")` or just a number of scripts with `s.RevertN("./path_to_your_scripts", 3)`.
 
 ### Usage: Recreate
 As you can imagine from the examples above `recreate` the database is no big deal
@@ -141,24 +137,21 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/rebel-l/schema"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
-	log := logrus.New()
 	db, err := sqlx.Open("sqlite3", "database.db")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	s := schema.New(db)
-	if err = s.Execute("./path_to_your_scripts", schema.CommandRecreate, ""); err != nil {
+	if err = s.Recreate("./path_to_your_scripts", "Application Version"); err != nil {
 		log.Fatal(err)
 	}
 }
 ```
-
-Just exchange the command in the call of `Execute`.
 
 ### Usage with Progress Bar
 Optional you can show a progress bar on the command line. All you need to do is calling the method `WithProgressBar()`
@@ -171,11 +164,10 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/rebel-l/schema"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
-	log := logrus.New()
 	db, err := sqlx.Open("sqlite3", "database.db")
 	if err != nil {
 		log.Fatal(err)
@@ -183,7 +175,7 @@ func main() {
 
 	s := schema.New(db)
 	s.WithProgressBar()
-	if err = s.Execute("./path_to_your_scripts", schema.CommandUpgrade, "Application Version"); err != nil {
+	if err = s.Upgrade("./path_to_your_scripts", "Application Version"); err != nil {
 		log.Fatal(err)
 	}
 }
