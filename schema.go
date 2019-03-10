@@ -111,18 +111,22 @@ func (s *Schema) Upgrade(path string, version string) error {
 
 // RevertLast reverts the last applied script. If it is repeatedly called, it reverts every time one script: means if
 // you run it twice it reverts the last two scripts and so on.
-// A path to the sql scripts needs to be provided. It applies only files with ending ".sql", sub folders are ignored.
+// A path to the sql scripts needs to be provided. It reverts only files with ending ".sql", sub folders are ignored.
 func (s *Schema) RevertLast(path string) error {
-	return s.revert(path, 1)
+	return s.RevertN(path, 1)
 }
 
 // RevertAll reverts the all applied scripts.
-// A path to the sql scripts needs to be provided. It applies only files with ending ".sql", sub folders are ignored.
+// A path to the sql scripts needs to be provided. It reverts only files with ending ".sql", sub folders are ignored.
 func (s *Schema) RevertAll(path string) error {
-	return s.revert(path, -1)
+	return s.RevertN(path, -1)
 }
 
-func (s *Schema) revert(path string, numOfScripts int) error {
+// RevertN reverts the number of n applied scripts. RevertLast() and RevertAll() are just shortcuts to this method.
+// A path to the sql scripts needs to be provided. It reverts only files with ending ".sql", sub folders are ignored.
+// Also the numOfScripts (number of scripts) to reverts needs to be provided. If the number is -1 or greater than
+// the number of files in path it reverts all.
+func (s *Schema) RevertN(path string, numOfScripts int) error {
 	executedScripts, err := s.Scripter.GetAll()
 	if err != nil {
 		return err
