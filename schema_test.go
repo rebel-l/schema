@@ -396,44 +396,12 @@ func TestSchema_Recreate_Unhappy_NotExistingPath(t *testing.T) {
 	}
 }
 
-func TestSchema_Execute_Unhappy_WrongCommand(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	s := getSchemaWithDummies(ctrl)
-
-	testCases := []struct {
-		name    string
-		command string
-	}{
-		{
-			name: "empty command",
-		},
-		{
-			name:    "wrong command",
-			command: "god_command",
-		},
-	}
-
-	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			if err := s.Execute("./", testCase.command, ""); err == nil {
-				t.Errorf("Expected an error on call with wrong command")
-			}
-		})
-	}
-}
-
 func getMockDB(ctrl *gomock.Controller, dummy bool) *store_mock.MockDatabaseConnector {
 	db := store_mock.NewMockDatabaseConnector(ctrl)
 	if dummy {
 		db.EXPECT().Select(gomock.Any(), gomock.Any()).Times(0)
 	}
 	return db
-}
-
-func getSchemaWithDummies(ctrl *gomock.Controller) schema.Schema {
-	return schema.New(getMockDB(ctrl, true))
 }
 
 func TestSchema_Upgrage_Integration_Happy(t *testing.T) {

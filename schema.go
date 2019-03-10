@@ -58,17 +58,6 @@ func (s *Schema) WithProgressBar() {
 	s.progressBar = true
 }
 
-// Execute applies all sql scripts for a given folder
-func (s *Schema) Execute(path string, command string, version string) error {
-	var err error
-	switch command {
-	default:
-		err = fmt.Errorf("command '%s' not found", command)
-	}
-
-	return err
-}
-
 // Upgrade applies new scripts to the database or if executed the first time applies all.
 // A path to the sql scripts needs to be provided. It applies only files with ending ".sql", sub folders are ignored.
 // The version of your application can be provided too, use empty string to ignore it.
