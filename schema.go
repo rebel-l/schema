@@ -15,11 +15,6 @@ import (
 	"gopkg.in/cheggaaa/pb.v1"
 )
 
-const (
-	// CommandRecreate is the command to recreate the schema
-	CommandRecreate = "recreate"
-)
-
 // Scripter provides methods to manage the access to log of SQL script executions
 type Scripter interface {
 	Add(entry *store.SchemaScript) error
@@ -67,8 +62,6 @@ func (s *Schema) WithProgressBar() {
 func (s *Schema) Execute(path string, command string, version string) error {
 	var err error
 	switch command {
-	case CommandRecreate:
-		err = s.Recreate(path, version)
 	default:
 		err = fmt.Errorf("command '%s' not found", command)
 	}

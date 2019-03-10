@@ -269,7 +269,7 @@ func TestSchema_RevertLast_Unhappy_GetAllError(t *testing.T) {
 	}
 }
 
-func TestSchema_Execute_CommandRecreate_Unhappy_ReInitError(t *testing.T) {
+func TestSchema_Recreate_Unhappy_ReInitError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -289,7 +289,7 @@ func TestSchema_Execute_CommandRecreate_Unhappy_ReInitError(t *testing.T) {
 	s.Applier = mockApplier
 	s.Scripter = mockScripter
 
-	if err := s.Execute("./testdata/unit", schema.CommandRecreate, ""); err == nil {
+	if err := s.Recreate("./testdata/unit", ""); err == nil {
 		t.Error("Expected error is returned on failed recreate")
 	}
 }
@@ -364,20 +364,17 @@ func TestSchema_RevertLast_Unhappy_NotExistingPath(t *testing.T) {
 	}
 }
 
-func TestSchema_Execute_Unhappy_NotExistingPath(t *testing.T) {
+func TestSchema_Recreate_Unhappy_NotExistingPath(t *testing.T) {
 	testCases := []struct {
-		name    string
-		path    string
-		command string
+		name string
+		path string
 	}{
 		{
-			name:    "empty path - recreate",
-			command: schema.CommandRecreate,
+			name: "empty path - recreate",
 		},
 		{
-			name:    "path not exists - recreate",
-			path:    "not_existing_path",
-			command: schema.CommandRecreate,
+			name: "path not exists - recreate",
+			path: "not_existing_path",
 		},
 	}
 
@@ -392,7 +389,7 @@ func TestSchema_Execute_Unhappy_NotExistingPath(t *testing.T) {
 			s := schema.New(getMockDB(ctrl, true))
 			s.Scripter = mockScripter
 
-			if err := s.Execute(testCase.path, testCase.command, ""); err == nil {
+			if err := s.Recreate(testCase.path, ""); err == nil {
 				t.Errorf("Expected an error on call with not existing path")
 			}
 		})
@@ -617,7 +614,7 @@ func TestSchema_RevertLast_Integration_Happy(t *testing.T) {
 	checkTable("something", db, t, 0)
 }
 
-func TestSchema_Execute_Integration_CommandRecreate_Happy(t *testing.T) {
+func TestSchema_Recreate_Integration_Happy(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipped because of long running")
 	}
@@ -670,7 +667,7 @@ func TestSchema_Execute_Integration_CommandRecreate_Happy(t *testing.T) {
 	checkTable("something_new", db, t, 0)
 
 	// now the test
-	if err = s.Execute("./testdata/recreate", schema.CommandRecreate, ""); err != nil {
+	if err = s.Recreate("./testdata/recreate", ""); err != nil {
 		t.Fatalf("not able to recreate: %s", err)
 	}
 
