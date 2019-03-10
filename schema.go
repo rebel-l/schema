@@ -68,7 +68,7 @@ func (s *Schema) Execute(path string, command string, version string) error {
 	var err error
 	switch command {
 	case CommandRecreate:
-		err = s.recreate(path, version)
+		err = s.Recreate(path, version)
 	default:
 		err = fmt.Errorf("command '%s' not found", command)
 	}
@@ -134,6 +134,12 @@ func (s *Schema) RevertLast(path string) error {
 	return s.revert(path, 1)
 }
 
+// RevertAll reverts the all applied scripts.
+// A path to the sql scripts needs to be provided. It applies only files with ending ".sql", sub folders are ignored.
+func (s *Schema) RevertAll(path string) error {
+	return s.revert(path, -1)
+}
+
 func (s *Schema) revert(path string, numOfScripts int) error {
 	executedScripts, err := s.Scripter.GetAll()
 	if err != nil {
@@ -182,9 +188,10 @@ func (s *Schema) revert(path string, numOfScripts int) error {
 	return nil
 }
 
-func (s *Schema) recreate(path string, version string) error {
+// Recreate reverts all applied scripts and apply them again. Internally it usues RevertAll() and Upgrade().
+func (s *Schema) Recreate(path string, version string) error {
 	var err error
-	if err = s.revert(path, -1); err != nil {
+	if err = s.RevertAll(path); err != nil {
 		return err
 	}
 
