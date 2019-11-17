@@ -19,18 +19,21 @@ func TestSchemaScriptMapper_Add_Integration(t *testing.T) {
 	if testing.Short() {
 		t.Skipf("skipped because of long running")
 	}
+
 	t.Parallel()
 
 	db, err := testdb.InitDB("./testdata/tmp/add_integration_tests.db")
 	if err != nil {
 		t.Fatalf("not able to open database connection: %s", err)
 	}
+
 	defer testdb.ShutdownDB(db, t)
 
 	// now the test
 	expected := store.NewSchemaScriptSuccess("some_script.sql", "0.5.2")
 
 	vm := store.NewSchemaScriptMapper(db)
+
 	err = vm.Add(expected)
 	if err != nil {
 		t.Fatalf("No error expected on adding entry to database: %s", err)
@@ -45,16 +48,19 @@ func TestSchemaScriptMapper_Remove_Integration(t *testing.T) {
 	if testing.Short() {
 		t.Skipf("skipped because of long running")
 	}
+
 	t.Parallel()
 
 	db, err := testdb.InitDB("./testdata/tmp/remove_integration_tests.db")
 	if err != nil {
 		t.Fatalf("not able to open database connection: %s", err)
 	}
+
 	defer testdb.ShutdownDB(db, t)
 
 	// init data
 	script := store.NewSchemaScriptSuccess("my.sql", "")
+
 	sm := store.NewSchemaScriptMapper(db)
 	if err = sm.Add(script); err != nil {
 		t.Fatalf("Failed to prepare data: %s", err)
@@ -69,6 +75,7 @@ func TestSchemaScriptMapper_Remove_Integration(t *testing.T) {
 	if err = sm.Remove(script.ScriptName); err != nil {
 		t.Fatalf("Failed to remove entry: %s", err)
 	}
+
 	after, err := sm.GetAll()
 	if err != nil {
 		t.Fatalf("Failed to get all data again: %s", err)
@@ -83,6 +90,7 @@ func TestSchemaScriptMapper_GetByID_Integration(t *testing.T) {
 	if testing.Short() {
 		t.Skipf("skipped because of long running")
 	}
+
 	t.Parallel()
 
 	testcases := []struct {
@@ -171,12 +179,14 @@ func TestSchemaScriptMapper_GetAll_Integration(t *testing.T) {
 	if testing.Short() {
 		t.Skipf("skipped because of long running")
 	}
+
 	t.Parallel()
 
 	db, err := testdb.InitDB("./testdata/tmp/getall_integration_tests.db")
 	if err != nil {
 		t.Fatalf("not able to open database connection: %s", err)
 	}
+
 	defer testdb.ShutdownDB(db, t)
 
 	expected := []*store.SchemaScript{
@@ -185,6 +195,7 @@ func TestSchemaScriptMapper_GetAll_Integration(t *testing.T) {
 	}
 
 	vm := store.NewSchemaScriptMapper(db)
+
 	for _, v := range expected {
 		err = vm.Add(v)
 		if err != nil {

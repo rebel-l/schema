@@ -30,6 +30,7 @@ func (i *InitDB) ApplyScript(fileName string) error {
 	if _, err = i.db.Exec(sqlScript); err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -43,6 +44,7 @@ func (i *InitDB) RevertScript(fileName string) error {
 	if _, err = i.db.Exec(sqlScript); err != nil {
 		return err
 	}
+
 	return nil
 }
 

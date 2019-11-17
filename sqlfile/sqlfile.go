@@ -29,6 +29,7 @@ func Scan(path string) ([]string, error) {
 	}
 
 	cleaned := make([]string, 0)
+
 	for _, v := range files {
 		if v.IsDir() {
 			continue
@@ -44,18 +45,23 @@ func Scan(path string) ([]string, error) {
 
 		cleaned = append(cleaned, path+"/"+v.Name())
 	}
+
 	return cleaned, nil
 }
 
 // ScanReverse does the same as Scan but returns the filenames in reverse order
 func ScanReverse(path string) ([]string, error) {
 	var files sort.StringSlice
+
 	var err error
+
 	files, err = Scan(path)
 	if err != nil {
 		return nil, err
 	}
+
 	sort.Sort(sort.Reverse(files))
+
 	return files, nil
 }
 
@@ -66,18 +72,22 @@ func Read(fileName string, command string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	defer func() {
 		err = file.Close()
 	}()
 
 	scanner := bufio.NewScanner(file)
+
 	var buffer string
+
 	recording := false
+
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
 
 		// no content ==> skip
-		if len(line) <= 0 {
+		if len(line) == 0 {
 			continue
 		}
 
@@ -90,6 +100,7 @@ func Read(fileName string, command string) (string, error) {
 			default:
 				recording = false
 			}
+
 			continue
 		}
 
@@ -98,5 +109,6 @@ func Read(fileName string, command string) (string, error) {
 			buffer += "\n" + line
 		}
 	}
+
 	return buffer, nil
 }

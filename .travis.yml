@@ -7,18 +7,14 @@ git:
   depth: 1
 
 before_install:
-  - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-  - dep version
-  - dep ensure
-  - go get -u github.com/alecthomas/gometalinter
-  - gometalinter --install
+  - go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
   - go get github.com/mattn/goveralls
 
 before_script:
   - chmod 755 ./scripts/tools/*
 
 script:
-  - gometalinter --config=gometalinter.json
+  - golangci-lint run -v
   - go test -v -cover -race -coverprofile=coverage.txt -covermode=atomic ./...
   - $GOPATH/bin/goveralls -service=travis-ci
 

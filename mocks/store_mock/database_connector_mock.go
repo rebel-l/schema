@@ -33,6 +33,20 @@ func (m *MockDatabaseConnector) EXPECT() *MockDatabaseConnectorMockRecorder {
 	return m.recorder
 }
 
+// Close mocks base method
+func (m *MockDatabaseConnector) Close() error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Close")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Close indicates an expected call of Close
+func (mr *MockDatabaseConnectorMockRecorder) Close() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockDatabaseConnector)(nil).Close))
+}
+
 // Exec mocks base method
 func (m *MockDatabaseConnector) Exec(arg0 string, arg1 ...interface{}) (sql.Result, error) {
 	m.ctrl.T.Helper()
@@ -70,6 +84,20 @@ func (mr *MockDatabaseConnectorMockRecorder) Get(arg0, arg1 interface{}, arg2 ..
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockDatabaseConnector)(nil).Get), varargs...)
+}
+
+// Rebind mocks base method
+func (m *MockDatabaseConnector) Rebind(arg0 string) string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Rebind", arg0)
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// Rebind indicates an expected call of Rebind
+func (mr *MockDatabaseConnectorMockRecorder) Rebind(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Rebind", reflect.TypeOf((*MockDatabaseConnector)(nil).Rebind), arg0)
 }
 
 // Select mocks base method

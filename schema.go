@@ -86,8 +86,10 @@ func (s *Schema) Upgrade(path string, version string) error {
 	}
 
 	progressBar := s.startProgressBar(len(files))
+
 	for _, f := range files {
 		progressBar.Increment()
+
 		if executedScripts.ScriptExecuted(f) {
 			continue
 		}
@@ -105,7 +107,9 @@ func (s *Schema) Upgrade(path string, version string) error {
 			return err
 		}
 	}
+
 	progressBar.FinishPrint("Schema Upgrade finished!")
+
 	return nil
 }
 
@@ -147,11 +151,14 @@ func (s *Schema) RevertN(path string, numOfScripts int) error {
 
 	counter := 0
 	progressBar := s.startProgressBar(numOfScripts)
+
 	if numOfScripts < 1 {
 		progressBar = s.startProgressBar(len(files))
 	}
+
 	for _, f := range files {
 		progressBar.Increment()
+
 		if !executedScripts.ScriptExecuted(f) {
 			continue
 		}
@@ -169,6 +176,7 @@ func (s *Schema) RevertN(path string, numOfScripts int) error {
 			break
 		}
 	}
+
 	progressBar.FinishPrint("Schema revert finished!")
 
 	return nil
@@ -184,11 +192,13 @@ func (s *Schema) Recreate(path string, version string) error {
 	if err = s.Applier.ReInit(); err != nil {
 		return err
 	}
+
 	return s.Upgrade(path, version)
 }
 
 func checkDatabaseExists(db store.DatabaseConnector) bool {
 	var counter []uint32
+
 	q := "SELECT count(id) FROM schema_script;"
 	if err := db.Select(&counter, q); err != nil {
 		return false

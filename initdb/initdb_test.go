@@ -23,16 +23,20 @@ func TestInitDB_ApplyScript_Integration_Happy(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to open database: %s", err)
 	}
+
 	defer testdb.ShutdownDB(db, t)
 
 	in := initdb.New(db)
+
 	err = in.ApplyScript("./testdata/001.sql")
 	if err != nil {
 		t.Errorf("Expected no error but got %s", err)
 	}
 
 	var counter []uint32
+
 	q := db.Rebind("SELECT count(id) FROM something;")
+
 	err = db.Select(&counter, q)
 	if err != nil {
 		t.Fatalf("not able count rows in table: %s", err)
@@ -94,16 +98,20 @@ func TestInitDB_RevertScript_Integration_Happy(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to open database: %s", err)
 	}
+
 	defer testdb.ShutdownDB(db, t)
 
 	in := initdb.New(db)
+
 	err = in.RevertScript("./testdata/001.sql")
 	if err != nil {
 		t.Errorf("Expected no error but got %s", err)
 	}
 
 	var counter []uint32
+
 	q := db.Rebind("SELECT count(id) FROM something;")
+
 	err = db.Select(&counter, q)
 	if err == nil {
 		t.Fatalf("table wasn't dropped: %s", err)
@@ -155,9 +163,11 @@ func TestInitDB_RevertScript_Integration_Unhappy(t *testing.T) {
 func getMockDB(t *testing.T, errorMsg string) (*gomock.Controller, *store_mock.MockDatabaseConnector) {
 	ctrl := gomock.NewController(t)
 	mockDB := store_mock.NewMockDatabaseConnector(ctrl)
+
 	if errorMsg != "" {
 		mockDB.EXPECT().Exec(gomock.Any()).Return(nil, errors.New("something happened"))
 	}
+
 	return ctrl, mockDB
 }
 
@@ -205,16 +215,20 @@ func TestInitDB_Init_Integration_Happy(t *testing.T) {
 	if err != nil {
 		t.Fatalf("not able to open database connection: %s", err)
 	}
+
 	defer testdb.ShutdownDB(db, t)
 
 	in := initdb.New(db)
+
 	err = in.Init()
 	if err != nil {
 		t.Errorf("Expected no error but got %s", err)
 	}
 
 	var counter []uint32
+
 	q := db.Rebind("SELECT count(id) FROM schema_script;")
+
 	err = db.Select(&counter, q)
 	if err != nil {
 		t.Fatalf("not able count rows in table: %s", err)
@@ -271,6 +285,7 @@ func TestInitDB_ReInit_Integration_Happy(t *testing.T) {
 	if err != nil {
 		t.Fatalf("not able to open database connection: %s", err)
 	}
+
 	defer testdb.ShutdownDB(db, t)
 
 	// prepare
@@ -285,6 +300,7 @@ func TestInitDB_ReInit_Integration_Happy(t *testing.T) {
 	}
 
 	var counter []uint32
+
 	q := db.Rebind("SELECT count(id) FROM schema_script;")
 	if err = db.Select(&counter, q); err != nil {
 		t.Fatalf("Prepare: not able count rows in table: %s", err)

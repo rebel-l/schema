@@ -63,6 +63,7 @@ func (ssm *SchemaScriptMapper) Remove(scriptName string) error {
 	if _, err := ssm.db.Exec(q, scriptName); err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -74,6 +75,7 @@ func (ssm SchemaScriptMapper) GetByID(id int64) (*SchemaScript, error) {
 
 	sv := &SchemaScript{}
 	q := `SELECT * from schema_script WHERE id = ?`
+
 	if err := ssm.db.Get(sv, q, id); err != nil {
 		return nil, fmt.Errorf("SchemaScriptMapper, get by id failed: %s", err)
 	}
@@ -84,6 +86,7 @@ func (ssm SchemaScriptMapper) GetByID(id int64) (*SchemaScript, error) {
 // GetAll returns all SchemaScript entries
 func (ssm SchemaScriptMapper) GetAll() (SchemaScriptCollection, error) {
 	var versions []*SchemaScript
+
 	q := `SELECT * FROM schema_script`
 	if err := ssm.db.Select(&versions, q); err != nil {
 		return nil, err

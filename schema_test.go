@@ -8,7 +8,6 @@ import (
 
 	"github.com/rebel-l/go-utils/osutils"
 
-	"github.com/jmoiron/sqlx"
 	"github.com/rebel-l/schema"
 	"github.com/rebel-l/schema/mocks/schema_mock"
 	"github.com/rebel-l/schema/mocks/store_mock"
@@ -176,7 +175,7 @@ func TestSchema_Upgrade_Unhappy_ApplyErrorAddError(t *testing.T) {
 
 	errMsg1 := "failed apply"
 	errMsg2 := "failed add"
-	expected := "original error: failed to execute script ./testdata/unit/001.sql: failed apply, following error: failed add"
+	expected := "original error: failed to execute script ./testdata/unit/001.sql: failed apply, following error: failed add" // nolint: lll
 
 	mockDB := getMockDB(ctrl, false)
 	mockDB.EXPECT().Select(gomock.Any(), gomock.Any()).Times(1).Return(nil)
@@ -398,9 +397,11 @@ func TestSchema_Recreate_Unhappy_NotExistingPath(t *testing.T) {
 
 func getMockDB(ctrl *gomock.Controller, dummy bool) *store_mock.MockDatabaseConnector {
 	db := store_mock.NewMockDatabaseConnector(ctrl)
+
 	if dummy {
 		db.EXPECT().Select(gomock.Any(), gomock.Any()).Times(0)
 	}
+
 	return db
 }
 
@@ -413,9 +414,11 @@ func TestSchema_Upgrage_Integration_Happy(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to init database: %s", err)
 	}
+
 	defer testdb.ShutdownDB(db, t)
 
 	s := schema.New(db)
+
 	err = s.Upgrade("./testdata/upgrade/happy", "")
 	if err != nil {
 		t.Errorf("Expected no error but got %s", err)
@@ -451,6 +454,7 @@ func TestSchema_Upgrade_Integration_Happy_TwoSteps(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to init database: %s", err)
 	}
+
 	defer func() {
 		testdb.ShutdownDB(db, t)
 
@@ -470,7 +474,7 @@ func TestSchema_Upgrade_Integration_Happy_TwoSteps(t *testing.T) {
 	step2(t, db, s, expected)
 }
 
-func step1(t *testing.T, db *sqlx.DB, s schema.Schema) store.SchemaScriptCollection {
+func step1(t *testing.T, db store.DatabaseConnector, s schema.Schema) store.SchemaScriptCollection {
 	var err error
 	/**
 	STEP 1
@@ -498,10 +502,11 @@ func step1(t *testing.T, db *sqlx.DB, s schema.Schema) store.SchemaScriptCollect
 
 	checkScriptTable("TestSchema_Upgrade_Integration_Happy_TwoSteps - Step 1", expected, data, t)
 	checkTable("something", db, t, 0)
+
 	return expected
 }
 
-func step2(t *testing.T, db *sqlx.DB, s schema.Schema, expected store.SchemaScriptCollection) {
+func step2(t *testing.T, db store.DatabaseConnector, s schema.Schema, expected store.SchemaScriptCollection) {
 	var err error
 	/**
 	STEP 2
@@ -539,6 +544,7 @@ func TestSchema_RevertLast_Integration_Happy(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to init database: %s", err)
 	}
+
 	defer testdb.ShutdownDB(db, t)
 
 	s := schema.New(db)
@@ -591,6 +597,7 @@ func TestSchema_Recreate_Integration_Happy(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to init database: %s", err)
 	}
+
 	defer testdb.ShutdownDB(db, t)
 
 	// prepare
@@ -650,7 +657,12 @@ func TestSchema_Recreate_Integration_Happy(t *testing.T) {
 	checkTable("something_new", db, t, 0)
 }
 
-func checkScriptTable(testName string, expected store.SchemaScriptCollection, actual store.SchemaScriptCollection, t *testing.T) {
+func checkScriptTable(
+	testName string,
+	expected store.SchemaScriptCollection,
+	actual store.SchemaScriptCollection,
+	t *testing.T,
+) {
 	if len(expected) != len(actual) {
 		t.Fatalf("%s: Expeted %d rows in table but got %d", testName, len(expected), len(actual))
 	}
@@ -675,9 +687,11 @@ func checkScriptTable(testName string, expected store.SchemaScriptCollection, ac
 	}
 }
 
-func checkTable(tableName string, db *sqlx.DB, t *testing.T, expectedCount uint32) {
+func checkTable(tableName string, db store.DatabaseConnector, t *testing.T, expectedCount uint32) {
 	var counter []uint32
-	q := db.Rebind(fmt.Sprintf("SELECT count(id) FROM %s;", tableName))
+
+	q := db.Rebind(fmt.Sprintf("SELECT count(id) FROM %s;", tableName)) // nolint: gosec
+
 	err := db.Select(&counter, q)
 	if err != nil {
 		t.Fatalf("not able count rows in table: %s", err)

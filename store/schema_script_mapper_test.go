@@ -21,8 +21,14 @@ func TestSchemaScriptMapper_Add_Happy(t *testing.T) {
 
 	mockDb := store_mock.NewMockDatabaseConnector(ctrl)
 	mockDb.EXPECT().
-		Exec(gomock.Any(), script.ScriptName, script.ExecutedAt.Format(dateTimeFormat), script.Status, script.ErrorMsg, script.AppVersion).
-		Return(mockRes, nil)
+		Exec(
+			gomock.Any(),
+			script.ScriptName,
+			script.ExecutedAt.Format(dateTimeFormat),
+			script.Status,
+			script.ErrorMsg,
+			script.AppVersion,
+		).Return(mockRes, nil)
 
 	mapper := NewSchemaScriptMapper(mockDb)
 	if err := mapper.Add(script); err != nil {
@@ -40,6 +46,7 @@ func TestSchemaScriptMapper_Add_Unhappy_NilEntry(t *testing.T) {
 
 	mockDb := store_mock.NewMockDatabaseConnector(ctrl)
 	mockDb.EXPECT().Exec(gomock.Any()).Times(0)
+
 	mapper := NewSchemaScriptMapper(mockDb)
 	if err := mapper.Add(nil); err == nil {
 		t.Errorf("nil should be not allowed and throw an error")
@@ -57,8 +64,14 @@ func TestSchemaScriptMapper_Add_Unhappy_InsertError(t *testing.T) {
 
 	mockDb := store_mock.NewMockDatabaseConnector(ctrl)
 	mockDb.EXPECT().
-		Exec(gomock.Any(), script.ScriptName, script.ExecutedAt.Format(dateTimeFormat), script.Status, script.ErrorMsg, script.AppVersion).
-		Return(mockRes, errors.New("insert failed"))
+		Exec(
+			gomock.Any(),
+			script.ScriptName,
+			script.ExecutedAt.Format(dateTimeFormat),
+			script.Status,
+			script.ErrorMsg,
+			script.AppVersion,
+		).Return(mockRes, errors.New("insert failed"))
 
 	mapper := NewSchemaScriptMapper(mockDb)
 	if err := mapper.Add(script); err == nil {
@@ -77,8 +90,14 @@ func TestSchemaScriptMapper_Add_Unhappy_LastInsertError(t *testing.T) {
 
 	mockDb := store_mock.NewMockDatabaseConnector(ctrl)
 	mockDb.EXPECT().
-		Exec(gomock.Any(), script.ScriptName, script.ExecutedAt.Format(dateTimeFormat), script.Status, script.ErrorMsg, script.AppVersion).
-		Return(mockRes, nil)
+		Exec(
+			gomock.Any(),
+			script.ScriptName,
+			script.ExecutedAt.Format(dateTimeFormat),
+			script.Status,
+			script.ErrorMsg,
+			script.AppVersion,
+		).Return(mockRes, nil)
 
 	mapper := NewSchemaScriptMapper(mockDb)
 	if err := mapper.Add(script); err == nil {
@@ -132,6 +151,7 @@ func TestSchemaScriptMapper_Remove_Unhappy_EmptyScriptName(t *testing.T) {
 
 	mockDb := store_mock.NewMockDatabaseConnector(ctrl)
 	mockDb.EXPECT().Exec(gomock.Any()).Times(0)
+
 	mapper := NewSchemaScriptMapper(mockDb)
 	if err := mapper.Remove(""); err == nil {
 		t.Errorf("empty script name should be not allowed and throw an error")
@@ -148,6 +168,7 @@ func TestSchemaScriptMapper_GetByID_Happy(t *testing.T) {
 	mockDb.EXPECT().Get(gomock.Any(), gomock.Any(), id).Return(nil)
 
 	mapper := NewSchemaScriptMapper(mockDb)
+
 	_, err := mapper.GetByID(id)
 	if err != nil {
 		t.Errorf("no error expected on reading")
@@ -200,6 +221,7 @@ func TestSchemaScriptMapper_GetByID_Unhappy_SelectError(t *testing.T) {
 	mockDb.EXPECT().Get(gomock.Any(), gomock.Any(), id).Return(errors.New("select failed"))
 
 	mapper := NewSchemaScriptMapper(mockDb)
+
 	res, err := mapper.GetByID(id)
 	if err == nil {
 		t.Errorf("expected error on reading failure")
@@ -219,6 +241,7 @@ func TestSchemaScriptMapper_GetAll_Happy(t *testing.T) {
 	mockDb.EXPECT().Select(gomock.Any(), gomock.Any(), gomock.Eq(empty))
 
 	mapper := NewSchemaScriptMapper(mockDb)
+
 	_, err := mapper.GetAll()
 	if err != nil {
 		t.Errorf("no error expected on getting all entries")
@@ -234,6 +257,7 @@ func TestSchemaScriptMapper_GetAll_Unhappy(t *testing.T) {
 	mockDb.EXPECT().Select(gomock.Any(), gomock.Any(), gomock.Eq(empty)).Return(errors.New("select failed"))
 
 	mapper := NewSchemaScriptMapper(mockDb)
+
 	res, err := mapper.GetAll()
 	if err == nil {
 		t.Errorf("expected error on reading failure")

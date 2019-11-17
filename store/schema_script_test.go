@@ -24,7 +24,11 @@ func TestNewSchemaScriptSuccess(t *testing.T) {
 	}
 
 	if actual.ExecutedAt.Before(expected.ExecutedAt) {
-		t.Errorf("expected executionAt would be later or equal than '%s' but got '%s'", expected.ExecutedAt.String(), actual.ExecutedAt.String())
+		t.Errorf(
+			"expected executionAt would be later or equal than '%s' but got '%s'",
+			expected.ExecutedAt.String(),
+			actual.ExecutedAt.String(),
+		)
 	}
 
 	if actual.Status != expected.Status {
@@ -32,7 +36,11 @@ func TestNewSchemaScriptSuccess(t *testing.T) {
 	}
 
 	if actual.AppVersion != expected.AppVersion {
-		t.Errorf("expected that appVersion is automatically set to '%s' but got '%s'", expected.AppVersion, actual.AppVersion)
+		t.Errorf(
+			"expected that appVersion is automatically set to '%s' but got '%s'",
+			expected.AppVersion,
+			actual.AppVersion,
+		)
 	}
 
 	if actual.ErrorMsg != "" {
@@ -59,7 +67,11 @@ func TestNewSchemaScriptError(t *testing.T) {
 	}
 
 	if actual.ExecutedAt.Before(expected.ExecutedAt) {
-		t.Errorf("expected executionAt would be later or equal than '%s' but got '%s'", expected.ExecutedAt.String(), actual.ExecutedAt.String())
+		t.Errorf(
+			"expected executionAt would be later or equal than '%s' but got '%s'",
+			expected.ExecutedAt.String(),
+			actual.ExecutedAt.String(),
+		)
 	}
 
 	if actual.Status != expected.Status {
@@ -67,7 +79,11 @@ func TestNewSchemaScriptError(t *testing.T) {
 	}
 
 	if actual.AppVersion != expected.AppVersion {
-		t.Errorf("expected that appVersion is automatically set to '%s' but got '%s'", expected.AppVersion, actual.AppVersion)
+		t.Errorf(
+			"expected that appVersion is automatically set to '%s' but got '%s'",
+			expected.AppVersion,
+			actual.AppVersion,
+		)
 	}
 
 	if actual.ErrorMsg != expected.ErrorMsg {
@@ -152,7 +168,13 @@ func TestSchemaScriptCollection_ScriptExecuted(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			actual := testCase.collection.ScriptExecuted(testCase.scriptName)
 			if testCase.expected != actual {
-				t.Errorf("Expected for script '%s' and collection %v result is %t but got %t", testCase.scriptName, testCase.collection, testCase.expected, actual)
+				t.Errorf(
+					"Expected for script '%s' and collection %v result is %t but got %t",
+					testCase.scriptName,
+					testCase.collection,
+					testCase.expected,
+					actual,
+				)
 			}
 		})
 	}

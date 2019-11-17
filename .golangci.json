@@ -1,0 +1,37 @@
+{
+    "issues": {
+        "exclude-rules": [
+            {
+                "path": "_test.go",
+                "linters": [
+                    "dupl",
+                    "funlen"
+                ]
+            },
+            {
+                "linters": [
+                    "lll"
+                ],
+                "source": "^//go:generate "
+            }
+        ],
+        "exclude-use-default": false,
+        "max-issues-per-linter": 0,
+        "max-same-issues": 0
+    },
+    "linters": {
+        "enable-all": true,
+        "disable": [
+            "gochecknoglobals",
+            "scopelint"
+        ]
+    },
+    "run": {
+        "deadline": "5m",
+        "skip-dirs": [
+            "reports",
+            "scripts"
+        ],
+        "tests": true
+    }
+}
