@@ -32,12 +32,15 @@ func TestSchema_Upgrade_Happy(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
+		withProgressBar := testCase.withProgressBar
 		t.Run(testCase.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
 			mockDB := getMockDB(ctrl, false)
-			mockDB.EXPECT().Select(gomock.Any(), gomock.Any()).Times(1).Return(errors.New("failed"))
+			mockDB.EXPECT().
+				Select(gomock.Any(), gomock.Any()).Times(1).
+				Return(errors.New("failed")) // nolint: goerr113
 
 			mockApplier := schema_mock.NewMockApplier(ctrl)
 			mockApplier.EXPECT().Init().Times(1).Return(nil)
@@ -49,7 +52,7 @@ func TestSchema_Upgrade_Happy(t *testing.T) {
 			mockScripter.EXPECT().Add(gomock.Any()).Times(2).Return(nil)
 
 			s := schema.New(mockDB)
-			if testCase.withProgressBar {
+			if withProgressBar {
 				s.WithProgressBar()
 			}
 			s.Applier = mockApplier
@@ -73,7 +76,10 @@ func TestSchema_Upgrade_Unhappy_GetAllError(t *testing.T) {
 	mockApplier.EXPECT().Init().Times(1).Times(0)
 
 	mockScripter := schema_mock.NewMockScripter(ctrl)
-	mockScripter.EXPECT().GetAll().Times(1).Return(store.SchemaScriptCollection{}, errors.New("failed"))
+	mockScripter.EXPECT().
+		GetAll().
+		Times(1).
+		Return(store.SchemaScriptCollection{}, errors.New("failed")) // nolint: goerr113
 
 	s := schema.New(mockDB)
 	s.Applier = mockApplier
@@ -89,10 +95,10 @@ func TestSchema_Upgrade_Unhappy_InitError(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockDB := getMockDB(ctrl, false)
-	mockDB.EXPECT().Select(gomock.Any(), gomock.Any()).Return(errors.New("failed"))
+	mockDB.EXPECT().Select(gomock.Any(), gomock.Any()).Return(errors.New("failed")) // nolint: goerr113
 
 	mockApplier := schema_mock.NewMockApplier(ctrl)
-	mockApplier.EXPECT().Init().Return(errors.New("failed init"))
+	mockApplier.EXPECT().Init().Return(errors.New("failed init")) // nolint: goerr113
 
 	mockScripter := schema_mock.NewMockScripter(ctrl)
 	mockScripter.EXPECT().GetAll().Times(0)
@@ -122,7 +128,9 @@ func TestSchema_Upgrade_Unhappy_ApplyError(t *testing.T) {
 
 	mockApplier := schema_mock.NewMockApplier(ctrl)
 
-	mockApplier.EXPECT().ApplyScript("./testdata/unit/001.sql").Return(errors.New("failed apply"))
+	mockApplier.EXPECT().
+		ApplyScript("./testdata/unit/001.sql").
+		Return(errors.New("failed apply")) // nolint: goerr113
 
 	s := schema.New(mockDB)
 	s.Applier = mockApplier
@@ -150,7 +158,7 @@ func TestSchema_Upgrade_Unhappy_AddError(t *testing.T) {
 	mockScripter := schema_mock.NewMockScripter(ctrl)
 	res := store.SchemaScriptCollection{}
 	mockScripter.EXPECT().GetAll().Times(1).Return(res, nil)
-	mockScripter.EXPECT().Add(gomock.Any()).Return(errors.New(expected))
+	mockScripter.EXPECT().Add(gomock.Any()).Return(errors.New(expected)) // nolint: goerr113
 
 	mockApplier := schema_mock.NewMockApplier(ctrl)
 	mockApplier.EXPECT().ApplyScript("./testdata/unit/001.sql").Return(nil)
@@ -183,10 +191,10 @@ func TestSchema_Upgrade_Unhappy_ApplyErrorAddError(t *testing.T) {
 	mockScripter := schema_mock.NewMockScripter(ctrl)
 	res := store.SchemaScriptCollection{}
 	mockScripter.EXPECT().GetAll().Times(1).Return(res, nil)
-	mockScripter.EXPECT().Add(gomock.Any()).Return(errors.New(errMsg2))
+	mockScripter.EXPECT().Add(gomock.Any()).Return(errors.New(errMsg2)) // nolint: goerr113
 
 	mockApplier := schema_mock.NewMockApplier(ctrl)
-	mockApplier.EXPECT().ApplyScript("./testdata/unit/001.sql").Return(errors.New(errMsg1))
+	mockApplier.EXPECT().ApplyScript("./testdata/unit/001.sql").Return(errors.New(errMsg1)) // nolint: goerr113
 
 	s := schema.New(mockDB)
 	s.Applier = mockApplier
@@ -207,7 +215,9 @@ func TestSchema_RevertLast_Unhappy_RevertError(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockApplier := schema_mock.NewMockApplier(ctrl)
-	mockApplier.EXPECT().RevertScript("./testdata/unit/002.sql").Return(errors.New("failed"))
+	mockApplier.EXPECT().
+		RevertScript("./testdata/unit/002.sql").
+		Return(errors.New("failed")) // nolint: goerr113
 
 	mockScripter := schema_mock.NewMockScripter(ctrl)
 	res := store.SchemaScriptCollection{&store.SchemaScript{
@@ -238,7 +248,9 @@ func TestSchema_RevertLast_Unhappy_RemoveError(t *testing.T) {
 		Status:     store.StatusSuccess,
 	}}
 	mockScripter.EXPECT().GetAll().Times(1).Return(res, nil)
-	mockScripter.EXPECT().Remove("./testdata/unit/002.sql").Return(errors.New("failed"))
+	mockScripter.EXPECT().
+		Remove("./testdata/unit/002.sql").
+		Return(errors.New("failed")) // nolint: goerr113
 
 	s := schema.New(getMockDB(ctrl, true))
 	s.Applier = mockApplier
@@ -257,7 +269,9 @@ func TestSchema_RevertLast_Unhappy_GetAllError(t *testing.T) {
 	mockApplier.EXPECT().RevertScript("./testdata/unit/002.sql").Times(0)
 
 	mockScripter := schema_mock.NewMockScripter(ctrl)
-	mockScripter.EXPECT().GetAll().Return(nil, errors.New("failed getting data"))
+	mockScripter.EXPECT().
+		GetAll().
+		Return(nil, errors.New("failed getting data")) // nolint: goerr113
 
 	s := schema.New(getMockDB(ctrl, true))
 	s.Applier = mockApplier
@@ -274,7 +288,7 @@ func TestSchema_Recreate_Unhappy_ReInitError(t *testing.T) {
 
 	mockApplier := schema_mock.NewMockApplier(ctrl)
 	mockApplier.EXPECT().RevertScript("./testdata/unit/002.sql").Return(nil)
-	mockApplier.EXPECT().ReInit().Return(errors.New("failed to reinit db"))
+	mockApplier.EXPECT().ReInit().Return(errors.New("failed to reinit db")) // nolint: goerr113
 
 	mockScripter := schema_mock.NewMockScripter(ctrl)
 	res := store.SchemaScriptCollection{&store.SchemaScript{
@@ -308,6 +322,7 @@ func TestSchema_Upgrade_Unhappy_NotExistingPath(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
+		path := testCase.path
 		t.Run(testCase.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
@@ -324,7 +339,7 @@ func TestSchema_Upgrade_Unhappy_NotExistingPath(t *testing.T) {
 			s = schema.New(mockDB)
 			s.Scripter = mockScripter
 
-			if err := s.Upgrade(testCase.path, ""); err == nil {
+			if err := s.Upgrade(path, ""); err == nil {
 				t.Errorf("Expected an error on call with not existing path")
 			}
 		})
@@ -346,6 +361,7 @@ func TestSchema_RevertLast_Unhappy_NotExistingPath(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
+		path := testCase.path
 		t.Run(testCase.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
@@ -356,7 +372,7 @@ func TestSchema_RevertLast_Unhappy_NotExistingPath(t *testing.T) {
 			s := schema.New(getMockDB(ctrl, true))
 			s.Scripter = mockScripter
 
-			if err := s.RevertLast(testCase.path); err == nil {
+			if err := s.RevertLast(path); err == nil {
 				t.Errorf("Expected an error on call with not existing path")
 			}
 		})
@@ -378,6 +394,7 @@ func TestSchema_Recreate_Unhappy_NotExistingPath(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
+		path := testCase.path
 		t.Run(testCase.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
@@ -388,7 +405,7 @@ func TestSchema_Recreate_Unhappy_NotExistingPath(t *testing.T) {
 			s := schema.New(getMockDB(ctrl, true))
 			s.Scripter = mockScripter
 
-			if err := s.Recreate(testCase.path, ""); err == nil {
+			if err := s.Recreate(path, ""); err == nil {
 				t.Errorf("Expected an error on call with not existing path")
 			}
 		})

@@ -42,13 +42,13 @@ fi
 echo
 echo -en "\E[40;34m\033[1mInstall: golangci-lint\033[0m"
 echo
-go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
+go get github.com/golangci/golangci-lint/cmd/golangci-lint
 
 # install goconvey
 echo
 echo -en "\E[40;34m\033[1mInstall: goconvey\033[0m"
 echo
-go get -u github.com/smartystreets/goconvey
+go get github.com/smartystreets/goconvey
 
 # install gomock
 echo
@@ -56,6 +56,12 @@ echo -en "\E[40;34m\033[1mInstall: gomock\033[0m"
 echo
 go get github.com/golang/mock/gomock
 go install github.com/golang/mock/mockgen
+
+# tidy
+echo
+echo -en "\E[40;34m\033[1mTidy: go\033[0m"
+echo
+go mod tidy
 
 # hooks
 echo

@@ -4,7 +4,6 @@ package schema
 //go:generate mockgen -destination=mocks/schema_mock/schema_mock.go -package=schema_mock github.com/rebel-l/schema Applier,Scripter
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/rebel-l/schema/bar"
@@ -12,17 +11,17 @@ import (
 	"github.com/rebel-l/schema/sqlfile"
 	"github.com/rebel-l/schema/store"
 
-	"gopkg.in/cheggaaa/pb.v1"
+	"github.com/cheggaaa/pb/v3"
 )
 
-// Scripter provides methods to manage the access to log of SQL script executions
+// Scripter provides methods to manage the access to log of SQL script executions.
 type Scripter interface {
 	Add(entry *store.SchemaScript) error
 	GetAll() (store.SchemaScriptCollection, error)
 	Remove(scriptName string) error
 }
 
-// Applier provides methods to apply sql script to database
+// Applier provides methods to apply sql script to database.
 type Applier interface {
 	ApplyScript(fileName string) error
 	RevertScript(fileName string) error
@@ -30,13 +29,13 @@ type Applier interface {
 	ReInit() error
 }
 
-// Progressor provides methods to steer a progress bar
+// Progressor provides methods to steer a progress bar.
 type Progressor interface {
-	Increment() int
-	FinishPrint(msg string)
+	Increment() *pb.ProgressBar
+	Finish() *pb.ProgressBar
 }
 
-// Schema provides commands to organize your database schema
+// Schema provides commands to organize your database schema.
 type Schema struct {
 	Scripter    Scripter
 	Applier     Applier
@@ -44,7 +43,7 @@ type Schema struct {
 	db          store.DatabaseConnector
 }
 
-// New returns a Schema struct
+// New returns a Schema struct.
 func New(db store.DatabaseConnector) Schema {
 	return Schema{
 		Scripter: store.NewSchemaScriptMapper(db),
@@ -53,7 +52,7 @@ func New(db store.DatabaseConnector) Schema {
 	}
 }
 
-// WithProgressBar activate the progress bar
+// WithProgressBar activate the progress bar.
 func (s *Schema) WithProgressBar() {
 	s.progressBar = true
 }
@@ -95,12 +94,12 @@ func (s *Schema) Upgrade(path string, version string) error {
 		}
 
 		if err = s.Applier.ApplyScript(f); err != nil {
-			msg := fmt.Sprintf("failed to execute script %s: %s", f, err)
+			msg := fmt.Errorf("failed to execute script %s: %w", f, err)
 			if err := s.Scripter.Add(store.NewSchemaScriptError(f, version, err.Error())); err != nil {
-				msg = fmt.Sprintf("original error: %s, following error: %s", msg, err)
+				msg = fmt.Errorf("original error: %v, following error: %w", msg, err)
 			}
 
-			return errors.New(msg)
+			return msg
 		}
 
 		if err = s.Scripter.Add(store.NewSchemaScriptSuccess(f, version)); err != nil {
@@ -108,7 +107,7 @@ func (s *Schema) Upgrade(path string, version string) error {
 		}
 	}
 
-	progressBar.FinishPrint("Schema Upgrade finished!")
+	progressBar.Finish()
 
 	return nil
 }
@@ -177,7 +176,7 @@ func (s *Schema) RevertN(path string, numOfScripts int) error {
 		}
 	}
 
-	progressBar.FinishPrint("Schema revert finished!")
+	progressBar.Finish()
 
 	return nil
 }

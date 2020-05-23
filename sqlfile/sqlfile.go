@@ -3,6 +3,7 @@ package sqlfile
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -20,12 +21,17 @@ const (
 	prefix           = "--"
 )
 
+var (
+	// ErrScanFiles is used if scanning a file fails
+	ErrScanFiles = errors.New("scan files failed")
+)
+
 // Scan returns a sorted (asc) list of files (including path) ending with .sql
 // and file size bigger than zero. It excludes directories.
 func Scan(path string) ([]string, error) {
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
-		return nil, fmt.Errorf("scan files failed: %s", err)
+		return nil, fmt.Errorf("%w: %s", ErrScanFiles, err)
 	}
 
 	cleaned := make([]string, 0)
@@ -49,7 +55,7 @@ func Scan(path string) ([]string, error) {
 	return cleaned, nil
 }
 
-// ScanReverse does the same as Scan but returns the filenames in reverse order
+// ScanReverse does the same as Scan but returns the filenames in reverse order.
 func ScanReverse(path string) ([]string, error) {
 	var files sort.StringSlice
 
@@ -65,7 +71,7 @@ func ScanReverse(path string) ([]string, error) {
 	return files, nil
 }
 
-// Read returns the content of a file for the given command
+// Read returns the content of a file for the given command.
 func Read(fileName string, command string) (string, error) {
 	file, err := os.Open(filepath.Clean(fileName))
 

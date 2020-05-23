@@ -1,11 +1,13 @@
 // Package bar provides a fake progress bar to be compatible with the Progressor interface of package schema
 package bar
 
-// BlackHole represents a progress bar with no output
+import "github.com/cheggaaa/pb/v3"
+
+// BlackHole represents a progress bar with no output.
 type BlackHole struct{}
 
-// Increment does nothing
-func (b *BlackHole) Increment() int { return 0 }
+// Increment does nothing.
+func (b *BlackHole) Increment() *pb.ProgressBar { return &pb.ProgressBar{} }
 
-// FinishPrint does nothing
-func (b *BlackHole) FinishPrint(msg string) {}
+// Finish does nothing.
+func (b *BlackHole) Finish() *pb.ProgressBar { return &pb.ProgressBar{} }

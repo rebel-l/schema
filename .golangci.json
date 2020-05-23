@@ -21,10 +21,7 @@
     },
     "linters": {
         "enable-all": true,
-        "disable": [
-            "gochecknoglobals",
-            "scopelint"
-        ]
+        "disable": []
     },
     "run": {
         "deadline": "5m",
