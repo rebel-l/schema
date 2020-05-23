@@ -15,14 +15,14 @@ import (
 	"github.com/cheggaaa/pb/v3"
 )
 
-// Scripter provides methods to manage the access to log of SQL script executions
+// Scripter provides methods to manage the access to log of SQL script executions.
 type Scripter interface {
 	Add(entry *store.SchemaScript) error
 	GetAll() (store.SchemaScriptCollection, error)
 	Remove(scriptName string) error
 }
 
-// Applier provides methods to apply sql script to database
+// Applier provides methods to apply sql script to database.
 type Applier interface {
 	ApplyScript(fileName string) error
 	RevertScript(fileName string) error
@@ -30,13 +30,13 @@ type Applier interface {
 	ReInit() error
 }
 
-// Progressor provides methods to steer a progress bar
+// Progressor provides methods to steer a progress bar.
 type Progressor interface {
 	Increment() *pb.ProgressBar
 	Finish() *pb.ProgressBar
 }
 
-// Schema provides commands to organize your database schema
+// Schema provides commands to organize your database schema.
 type Schema struct {
 	Scripter    Scripter
 	Applier     Applier
@@ -44,7 +44,7 @@ type Schema struct {
 	db          store.DatabaseConnector
 }
 
-// New returns a Schema struct
+// New returns a Schema struct.
 func New(db store.DatabaseConnector) Schema {
 	return Schema{
 		Scripter: store.NewSchemaScriptMapper(db),
@@ -53,7 +53,7 @@ func New(db store.DatabaseConnector) Schema {
 	}
 }
 
-// WithProgressBar activate the progress bar
+// WithProgressBar activate the progress bar.
 func (s *Schema) WithProgressBar() {
 	s.progressBar = true
 }

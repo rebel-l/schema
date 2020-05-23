@@ -49,7 +49,7 @@ func Scan(path string) ([]string, error) {
 	return cleaned, nil
 }
 
-// ScanReverse does the same as Scan but returns the filenames in reverse order
+// ScanReverse does the same as Scan but returns the filenames in reverse order.
 func ScanReverse(path string) ([]string, error) {
 	var files sort.StringSlice
 
@@ -65,7 +65,7 @@ func ScanReverse(path string) ([]string, error) {
 	return files, nil
 }
 
-// Read returns the content of a file for the given command
+// Read returns the content of a file for the given command.
 func Read(fileName string, command string) (string, error) {
 	file, err := os.Open(filepath.Clean(fileName))
 

@@ -3,11 +3,11 @@ package bar
 
 import "github.com/cheggaaa/pb/v3"
 
-// BlackHole represents a progress bar with no output
+// BlackHole represents a progress bar with no output.
 type BlackHole struct{}
 
-// Increment does nothing
+// Increment does nothing.
 func (b *BlackHole) Increment() *pb.ProgressBar { return &pb.ProgressBar{} }
 
-// FinishPrint does nothing
+// Finish does nothing.
 func (b *BlackHole) Finish() *pb.ProgressBar { return &pb.ProgressBar{} }

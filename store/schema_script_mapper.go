@@ -4,19 +4,20 @@ import (
 	"fmt"
 )
 
-const dateTimeFormat = "2006-01-02T15:04:05Z"
+// DateTimeFormat represents the default sql datetime format.
+const DateTimeFormat = "2006-01-02T15:04:05Z"
 
-// SchemaScriptMapper is responsible for mapping and storing SchemaScript struct in database
+// SchemaScriptMapper is responsible for mapping and storing SchemaScript struct in database.
 type SchemaScriptMapper struct {
 	db DatabaseConnector
 }
 
-// NewSchemaScriptMapper returns a new SchemaScriptMapper
+// NewSchemaScriptMapper returns a new SchemaScriptMapper.
 func NewSchemaScriptMapper(db DatabaseConnector) *SchemaScriptMapper {
 	return &SchemaScriptMapper{db: db}
 }
 
-// Add adds a new row to the table
+// Add adds a new row to the table.
 func (ssm SchemaScriptMapper) Add(entry *SchemaScript) error {
 	if entry == nil {
 		return fmt.Errorf("SchemaScriptMapper, add: dataset must be provided")
@@ -35,7 +36,7 @@ func (ssm SchemaScriptMapper) Add(entry *SchemaScript) error {
 	res, err := ssm.db.Exec(
 		q,
 		entry.ScriptName,
-		entry.ExecutedAt.Format(dateTimeFormat),
+		entry.ExecutedAt.Format(DateTimeFormat),
 		entry.Status,
 		entry.ErrorMsg,
 		entry.AppVersion,
@@ -53,7 +54,7 @@ func (ssm SchemaScriptMapper) Add(entry *SchemaScript) error {
 	return nil
 }
 
-// Remove deletes an entry from table based on scriptName
+// Remove deletes an entry from table based on scriptName.
 func (ssm *SchemaScriptMapper) Remove(scriptName string) error {
 	if scriptName == "" {
 		return fmt.Errorf("SchemaScriptMapper, remove: script name must be provided")
@@ -67,7 +68,7 @@ func (ssm *SchemaScriptMapper) Remove(scriptName string) error {
 	return nil
 }
 
-// GetByID returns the SchemaScript entry found for provided id
+// GetByID returns the SchemaScript entry found for provided id.
 func (ssm SchemaScriptMapper) GetByID(id int64) (*SchemaScript, error) {
 	if id < 1 {
 		return nil, fmt.Errorf("SchemaScriptMapper, get by id: id must be greater than zero")
@@ -83,7 +84,7 @@ func (ssm SchemaScriptMapper) GetByID(id int64) (*SchemaScript, error) {
 	return sv, nil
 }
 
-// GetAll returns all SchemaScript entries
+// GetAll returns all SchemaScript entries.
 func (ssm SchemaScriptMapper) GetAll() (SchemaScriptCollection, error) {
 	var versions []*SchemaScript
 

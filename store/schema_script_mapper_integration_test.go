@@ -86,7 +86,7 @@ func TestSchemaScriptMapper_Remove_Integration(t *testing.T) {
 	}
 }
 
-func TestSchemaScriptMapper_GetByID_Integration(t *testing.T) {
+func TestSchemaScriptMapper_GetByID_Integration(t *testing.T) { // nolint: gocognit
 	if testing.Short() {
 		t.Skipf("skipped because of long running")
 	}
