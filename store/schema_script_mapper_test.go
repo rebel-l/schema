@@ -178,7 +178,7 @@ func TestSchemaScriptMapper_GetByID_Happy(t *testing.T) {
 }
 
 func TestSchemaScriptMapper_GetByID_Unhappy_ID(t *testing.T) {
-	tcs := []struct {
+	testCases := []struct {
 		name string
 		id   int64
 	}{
@@ -192,15 +192,16 @@ func TestSchemaScriptMapper_GetByID_Unhappy_ID(t *testing.T) {
 		},
 	}
 
-	for _, tc := range tcs {
-		t.Run(tc.name, func(t *testing.T) {
+	for _, testCase := range testCases {
+		id := testCase.id
+		t.Run(testCase.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 
 			mockDB := store_mock.NewMockDatabaseConnector(ctrl)
 			mockDB.EXPECT().Select(gomock.Any(), gomock.Any()).Times(0)
 
 			mapper := store.NewSchemaScriptMapper(mockDB)
-			res, err := mapper.GetByID(tc.id)
+			res, err := mapper.GetByID(id)
 			if err == nil {
 				t.Errorf("get entry with zero or negative id should cause an error")
 			}

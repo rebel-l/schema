@@ -32,6 +32,7 @@ func TestSchema_Upgrade_Happy(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
+		withProgressBar := testCase.withProgressBar
 		t.Run(testCase.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
@@ -51,7 +52,7 @@ func TestSchema_Upgrade_Happy(t *testing.T) {
 			mockScripter.EXPECT().Add(gomock.Any()).Times(2).Return(nil)
 
 			s := schema.New(mockDB)
-			if testCase.withProgressBar {
+			if withProgressBar {
 				s.WithProgressBar()
 			}
 			s.Applier = mockApplier
@@ -321,6 +322,7 @@ func TestSchema_Upgrade_Unhappy_NotExistingPath(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
+		path := testCase.path
 		t.Run(testCase.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
@@ -337,7 +339,7 @@ func TestSchema_Upgrade_Unhappy_NotExistingPath(t *testing.T) {
 			s = schema.New(mockDB)
 			s.Scripter = mockScripter
 
-			if err := s.Upgrade(testCase.path, ""); err == nil {
+			if err := s.Upgrade(path, ""); err == nil {
 				t.Errorf("Expected an error on call with not existing path")
 			}
 		})
@@ -359,6 +361,7 @@ func TestSchema_RevertLast_Unhappy_NotExistingPath(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
+		path := testCase.path
 		t.Run(testCase.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
@@ -369,7 +372,7 @@ func TestSchema_RevertLast_Unhappy_NotExistingPath(t *testing.T) {
 			s := schema.New(getMockDB(ctrl, true))
 			s.Scripter = mockScripter
 
-			if err := s.RevertLast(testCase.path); err == nil {
+			if err := s.RevertLast(path); err == nil {
 				t.Errorf("Expected an error on call with not existing path")
 			}
 		})
@@ -391,6 +394,7 @@ func TestSchema_Recreate_Unhappy_NotExistingPath(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
+		path := testCase.path
 		t.Run(testCase.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
@@ -401,7 +405,7 @@ func TestSchema_Recreate_Unhappy_NotExistingPath(t *testing.T) {
 			s := schema.New(getMockDB(ctrl, true))
 			s.Scripter = mockScripter
 
-			if err := s.Recreate(testCase.path, ""); err == nil {
+			if err := s.Recreate(path, ""); err == nil {
 				t.Errorf("Expected an error on call with not existing path")
 			}
 		})

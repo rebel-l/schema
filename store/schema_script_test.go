@@ -167,14 +167,17 @@ func TestSchemaScriptCollection_ScriptExecuted(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
+		collection := testCase.collection
+		scriptName := testCase.scriptName
+		expected := testCase.expected
 		t.Run(testCase.name, func(t *testing.T) {
-			actual := testCase.collection.ScriptExecuted(testCase.scriptName)
-			if testCase.expected != actual {
+			actual := collection.ScriptExecuted(scriptName)
+			if expected != actual {
 				t.Errorf(
 					"Expected for script '%s' and collection %v result is %t but got %t",
-					testCase.scriptName,
-					testCase.collection,
-					testCase.expected,
+					scriptName,
+					collection,
+					expected,
 					actual,
 				)
 			}

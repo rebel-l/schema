@@ -121,14 +121,15 @@ func TestSchemaScriptMapper_GetByID_Integration(t *testing.T) { // nolint: gocog
 	}
 
 	for _, testcase := range testcases {
+		dbFile := testcase.dbFile
+		expected := testcase.expected
 		t.Run(testcase.name, func(t *testing.T) {
-			db, err := testdb.InitDB(testcase.dbFile)
+			db, err := testdb.InitDB(dbFile)
 			if err != nil {
 				t.Fatalf("not able to open database connection: %s", err)
 			}
 			defer testdb.ShutdownDB(db, t)
 
-			expected := testcase.expected
 			vm := store.NewSchemaScriptMapper(db)
 			err = vm.Add(expected)
 			if err != nil {

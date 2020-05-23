@@ -72,18 +72,21 @@ func TestInitDB_ApplyScript_Integration_Unhappy(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
+		dbErrorMsg := testCase.dbErrorMsg
+		scriptName := testCase.scriptName
+		expected := testCase.expected
 		t.Run(testCase.name, func(t *testing.T) {
-			ctrl, mockDB := getMockDB(t, testCase.dbErrorMsg)
+			ctrl, mockDB := getMockDB(t, dbErrorMsg)
 			defer ctrl.Finish()
 
 			in := initdb.New(mockDB)
-			err := in.ApplyScript(testCase.scriptName)
+			err := in.ApplyScript(scriptName)
 			if err == nil {
 				t.Error("Expected that error is returned")
 			}
 
-			if err != nil && !strings.Contains(err.Error(), testCase.expected) {
-				t.Errorf("Expected error message '%s' but got '%s'", testCase.expected, err)
+			if err != nil && !strings.Contains(err.Error(), expected) {
+				t.Errorf("Expected error message '%s' but got '%s'", expected, err)
 			}
 		})
 	}
@@ -143,18 +146,21 @@ func TestInitDB_RevertScript_Integration_Unhappy(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
+		dbErrorMsg := testCase.dbErrorMsg
+		scriptName := testCase.scriptName
+		expected := testCase.expected
 		t.Run(testCase.name, func(t *testing.T) {
-			ctrl, mockDB := getMockDB(t, testCase.dbErrorMsg)
+			ctrl, mockDB := getMockDB(t, dbErrorMsg)
 			defer ctrl.Finish()
 
 			in := initdb.New(mockDB)
-			err := in.RevertScript(testCase.scriptName)
+			err := in.RevertScript(scriptName)
 			if err == nil {
 				t.Error("Expected that error is returned")
 			}
 
-			if err != nil && !strings.Contains(err.Error(), testCase.expected) {
-				t.Errorf("Expected error message '%s' but got '%s'", testCase.expected, err)
+			if err != nil && !strings.Contains(err.Error(), expected) {
+				t.Errorf("Expected error message '%s' but got '%s'", expected, err)
 			}
 		})
 	}
