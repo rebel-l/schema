@@ -12,7 +12,7 @@ import (
 	"github.com/rebel-l/schema/sqlfile"
 	"github.com/rebel-l/schema/store"
 
-	"gopkg.in/cheggaaa/pb.v1"
+	"github.com/cheggaaa/pb/v3"
 )
 
 // Scripter provides methods to manage the access to log of SQL script executions
@@ -32,8 +32,8 @@ type Applier interface {
 
 // Progressor provides methods to steer a progress bar
 type Progressor interface {
-	Increment() int
-	FinishPrint(msg string)
+	Increment() *pb.ProgressBar
+	Finish() *pb.ProgressBar
 }
 
 // Schema provides commands to organize your database schema
@@ -108,7 +108,7 @@ func (s *Schema) Upgrade(path string, version string) error {
 		}
 	}
 
-	progressBar.FinishPrint("Schema Upgrade finished!")
+	progressBar.Finish()
 
 	return nil
 }
@@ -177,7 +177,7 @@ func (s *Schema) RevertN(path string, numOfScripts int) error {
 		}
 	}
 
-	progressBar.FinishPrint("Schema revert finished!")
+	progressBar.Finish()
 
 	return nil
 }
