@@ -1,25 +1,40 @@
 package store
 
 import (
+	"errors"
 	"fmt"
 )
 
-const dateTimeFormat = "2006-01-02T15:04:05Z"
+const (
+	// DateTimeFormat represents the default sql datetime format.
+	DateTimeFormat = "2006-01-02T15:04:05Z"
+)
 
-// SchemaScriptMapper is responsible for mapping and storing SchemaScript struct in database
+var (
+	// ErrNoDataset is used if no data for row is provided
+	ErrNoDataset = errors.New("dataset must be provided")
+
+	// ErrNoID is used if no or wrong id was provided
+	ErrNoID = errors.New("id must be greater than zero")
+
+	// ErrNoScript is used if no script name was provided
+	ErrNoScript = errors.New("script name must be provided")
+)
+
+// SchemaScriptMapper is responsible for mapping and storing SchemaScript struct in database.
 type SchemaScriptMapper struct {
 	db DatabaseConnector
 }
 
-// NewSchemaScriptMapper returns a new SchemaScriptMapper
+// NewSchemaScriptMapper returns a new SchemaScriptMapper.
 func NewSchemaScriptMapper(db DatabaseConnector) *SchemaScriptMapper {
 	return &SchemaScriptMapper{db: db}
 }
 
-// Add adds a new row to the table
+// Add adds a new row to the table.
 func (ssm SchemaScriptMapper) Add(entry *SchemaScript) error {
 	if entry == nil {
-		return fmt.Errorf("SchemaScriptMapper, add: dataset must be provided")
+		return fmt.Errorf("SchemaScriptMapper, add: %w", ErrNoDataset)
 	}
 
 	q := `
@@ -35,28 +50,28 @@ func (ssm SchemaScriptMapper) Add(entry *SchemaScript) error {
 	res, err := ssm.db.Exec(
 		q,
 		entry.ScriptName,
-		entry.ExecutedAt.Format(dateTimeFormat),
+		entry.ExecutedAt.Format(DateTimeFormat),
 		entry.Status,
 		entry.ErrorMsg,
 		entry.AppVersion,
 	)
 
 	if err != nil {
-		return fmt.Errorf("SchemaScriptMapper, add failed: %s", err)
+		return fmt.Errorf("SchemaScriptMapper, add failed: %w", err)
 	}
 
 	entry.ID, err = res.LastInsertId()
 	if err != nil {
-		return fmt.Errorf("SchemaScriptMapper, add returns no new id: %s", err)
+		return fmt.Errorf("SchemaScriptMapper, add returns no new id: %w", err)
 	}
 
 	return nil
 }
 
-// Remove deletes an entry from table based on scriptName
+// Remove deletes an entry from table based on scriptName.
 func (ssm *SchemaScriptMapper) Remove(scriptName string) error {
 	if scriptName == "" {
-		return fmt.Errorf("SchemaScriptMapper, remove: script name must be provided")
+		return fmt.Errorf("SchemaScriptMapper, remove: %w", ErrNoScript)
 	}
 
 	q := `DELETE FROM schema_script WHERE script_name = ?;`
@@ -67,23 +82,23 @@ func (ssm *SchemaScriptMapper) Remove(scriptName string) error {
 	return nil
 }
 
-// GetByID returns the SchemaScript entry found for provided id
+// GetByID returns the SchemaScript entry found for provided id.
 func (ssm SchemaScriptMapper) GetByID(id int64) (*SchemaScript, error) {
 	if id < 1 {
-		return nil, fmt.Errorf("SchemaScriptMapper, get by id: id must be greater than zero")
+		return nil, fmt.Errorf("SchemaScriptMapper, get by id: %w", ErrNoID)
 	}
 
 	sv := &SchemaScript{}
 	q := `SELECT * from schema_script WHERE id = ?`
 
 	if err := ssm.db.Get(sv, q, id); err != nil {
-		return nil, fmt.Errorf("SchemaScriptMapper, get by id failed: %s", err)
+		return nil, fmt.Errorf("SchemaScriptMapper, get by id failed: %w", err)
 	}
 
 	return sv, nil
 }
 
-// GetAll returns all SchemaScript entries
+// GetAll returns all SchemaScript entries.
 func (ssm SchemaScriptMapper) GetAll() (SchemaScriptCollection, error) {
 	var versions []*SchemaScript
 

@@ -29,14 +29,16 @@ func TestScanHappy(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
+		path := testCase.path
+		expected := testCase.expected
 		t.Run(testCase.name, func(t *testing.T) {
-			actual, err := sqlfile.Scan(testCase.path)
+			actual, err := sqlfile.Scan(path)
 			if err != nil {
 				t.Fatalf("scan shouldn't cause error: %s", err)
 			}
 
-			if !array.StringArrayEquals(testCase.expected, actual) {
-				t.Errorf("Expected %#v but got %#v", testCase.expected, actual)
+			if !array.StringArrayEquals(expected, actual) {
+				t.Errorf("Expected %#v but got %#v", expected, actual)
 			}
 		})
 	}
@@ -71,14 +73,16 @@ func TestScanReverseHappy(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
+		path := testCase.path
+		expected := testCase.expected
 		t.Run(testCase.name, func(t *testing.T) {
-			actual, err := sqlfile.ScanReverse(testCase.path)
+			actual, err := sqlfile.ScanReverse(path)
 			if err != nil {
 				t.Fatalf("scan shouldn't cause error: %s", err)
 			}
 
-			if !array.StringArrayEquals(testCase.expected, actual) {
-				t.Errorf("Expected %#v but got %#v", testCase.expected, actual)
+			if !array.StringArrayEquals(expected, actual) {
+				t.Errorf("Expected %#v but got %#v", expected, actual)
 			}
 		})
 	}
@@ -115,15 +119,17 @@ DROP TABLE IF EXISTS another;`,
 	}
 
 	for _, testCase := range testCases {
+		command := testCase.command
+		expected := testCase.expected
 		t.Run(testCase.command, func(t *testing.T) {
 			fileName := "./testdata/Read/test.sql"
-			actual, err := sqlfile.Read(fileName, testCase.command)
+			actual, err := sqlfile.Read(fileName, command)
 			if err != nil {
 				t.Errorf("Expected that file name %s is readable but got %s", fileName, err)
 			}
 
-			if testCase.expected != actual {
-				t.Errorf("Expected file content '%s' but got '%s'", testCase.expected, actual)
+			if expected != actual {
+				t.Errorf("Expected file content '%s' but got '%s'", expected, actual)
 			}
 		})
 	}

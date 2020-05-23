@@ -1,8 +1,10 @@
-package store
+package store_test
 
 import (
 	"errors"
 	"testing"
+
+	"github.com/rebel-l/schema/store"
 
 	"github.com/golang/mock/gomock"
 	"github.com/rebel-l/schema/mocks"
@@ -14,23 +16,23 @@ func TestSchemaScriptMapper_Add_Happy(t *testing.T) {
 	defer ctrl.Finish()
 
 	expectedID := int64(101)
-	script := NewSchemaScriptSuccess("my_sql_script.sql", "0.1.0")
+	script := store.NewSchemaScriptSuccess("my_sql_script.sql", "0.1.0")
 
 	mockRes := mocks.NewMockResult(ctrl)
 	mockRes.EXPECT().LastInsertId().Return(expectedID, nil)
 
-	mockDb := store_mock.NewMockDatabaseConnector(ctrl)
-	mockDb.EXPECT().
+	mockDB := store_mock.NewMockDatabaseConnector(ctrl)
+	mockDB.EXPECT().
 		Exec(
 			gomock.Any(),
 			script.ScriptName,
-			script.ExecutedAt.Format(dateTimeFormat),
+			script.ExecutedAt.Format(store.DateTimeFormat),
 			script.Status,
 			script.ErrorMsg,
 			script.AppVersion,
 		).Return(mockRes, nil)
 
-	mapper := NewSchemaScriptMapper(mockDb)
+	mapper := store.NewSchemaScriptMapper(mockDB)
 	if err := mapper.Add(script); err != nil {
 		t.Errorf("error is not expected but got: %s", err)
 	}
@@ -44,10 +46,10 @@ func TestSchemaScriptMapper_Add_Unhappy_NilEntry(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockDb := store_mock.NewMockDatabaseConnector(ctrl)
-	mockDb.EXPECT().Exec(gomock.Any()).Times(0)
+	mockDB := store_mock.NewMockDatabaseConnector(ctrl)
+	mockDB.EXPECT().Exec(gomock.Any()).Times(0)
 
-	mapper := NewSchemaScriptMapper(mockDb)
+	mapper := store.NewSchemaScriptMapper(mockDB)
 	if err := mapper.Add(nil); err == nil {
 		t.Errorf("nil should be not allowed and throw an error")
 	}
@@ -57,23 +59,23 @@ func TestSchemaScriptMapper_Add_Unhappy_InsertError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	script := NewSchemaScriptSuccess("my_sql_script.sql", "0.2.0")
+	script := store.NewSchemaScriptSuccess("my_sql_script.sql", "0.2.0")
 
 	mockRes := mocks.NewMockResult(ctrl)
 	mockRes.EXPECT().LastInsertId().Times(0)
 
-	mockDb := store_mock.NewMockDatabaseConnector(ctrl)
-	mockDb.EXPECT().
+	mockDB := store_mock.NewMockDatabaseConnector(ctrl)
+	mockDB.EXPECT().
 		Exec(
 			gomock.Any(),
 			script.ScriptName,
-			script.ExecutedAt.Format(dateTimeFormat),
+			script.ExecutedAt.Format(store.DateTimeFormat),
 			script.Status,
 			script.ErrorMsg,
 			script.AppVersion,
-		).Return(mockRes, errors.New("insert failed"))
+		).Return(mockRes, errors.New("insert failed")) // nolint: goerr113
 
-	mapper := NewSchemaScriptMapper(mockDb)
+	mapper := store.NewSchemaScriptMapper(mockDB)
 	if err := mapper.Add(script); err == nil {
 		t.Errorf("error is expected on failing insert")
 	}
@@ -83,23 +85,23 @@ func TestSchemaScriptMapper_Add_Unhappy_LastInsertError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	script := NewSchemaScriptSuccess("my_sql_script.sql", "")
+	script := store.NewSchemaScriptSuccess("my_sql_script.sql", "")
 
 	mockRes := mocks.NewMockResult(ctrl)
-	mockRes.EXPECT().LastInsertId().Return(int64(0), errors.New("last insert failed"))
+	mockRes.EXPECT().LastInsertId().Return(int64(0), errors.New("last insert failed")) // nolint: goerr113
 
-	mockDb := store_mock.NewMockDatabaseConnector(ctrl)
-	mockDb.EXPECT().
+	mockDB := store_mock.NewMockDatabaseConnector(ctrl)
+	mockDB.EXPECT().
 		Exec(
 			gomock.Any(),
 			script.ScriptName,
-			script.ExecutedAt.Format(dateTimeFormat),
+			script.ExecutedAt.Format(store.DateTimeFormat),
 			script.Status,
 			script.ErrorMsg,
 			script.AppVersion,
 		).Return(mockRes, nil)
 
-	mapper := NewSchemaScriptMapper(mockDb)
+	mapper := store.NewSchemaScriptMapper(mockDB)
 	if err := mapper.Add(script); err == nil {
 		t.Errorf("error is expected on failing insert")
 	}
@@ -114,12 +116,12 @@ func TestSchemaScriptMapper_Remove_Happy(t *testing.T) {
 	mockRes := mocks.NewMockResult(ctrl)
 	mockRes.EXPECT().LastInsertId().Times(0)
 
-	mockDb := store_mock.NewMockDatabaseConnector(ctrl)
-	mockDb.EXPECT().
+	mockDB := store_mock.NewMockDatabaseConnector(ctrl)
+	mockDB.EXPECT().
 		Exec(gomock.Any(), scriptName).
 		Return(mockRes, nil)
 
-	mapper := NewSchemaScriptMapper(mockDb)
+	mapper := store.NewSchemaScriptMapper(mockDB)
 	if err := mapper.Remove(scriptName); err != nil {
 		t.Errorf("error is not expected but got: %s", err)
 	}
@@ -134,12 +136,12 @@ func TestSchemaScriptMapper_Remove_Unhappy_DeleteError(t *testing.T) {
 	mockRes := mocks.NewMockResult(ctrl)
 	mockRes.EXPECT().LastInsertId().Times(0)
 
-	mockDb := store_mock.NewMockDatabaseConnector(ctrl)
-	mockDb.EXPECT().
+	mockDB := store_mock.NewMockDatabaseConnector(ctrl)
+	mockDB.EXPECT().
 		Exec(gomock.Any(), scriptName).
-		Return(mockRes, errors.New("delete failed"))
+		Return(mockRes, errors.New("delete failed")) // nolint: goerr113
 
-	mapper := NewSchemaScriptMapper(mockDb)
+	mapper := store.NewSchemaScriptMapper(mockDB)
 	if err := mapper.Remove(scriptName); err == nil {
 		t.Errorf("error is expected on failing delete")
 	}
@@ -149,10 +151,10 @@ func TestSchemaScriptMapper_Remove_Unhappy_EmptyScriptName(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockDb := store_mock.NewMockDatabaseConnector(ctrl)
-	mockDb.EXPECT().Exec(gomock.Any()).Times(0)
+	mockDB := store_mock.NewMockDatabaseConnector(ctrl)
+	mockDB.EXPECT().Exec(gomock.Any()).Times(0)
 
-	mapper := NewSchemaScriptMapper(mockDb)
+	mapper := store.NewSchemaScriptMapper(mockDB)
 	if err := mapper.Remove(""); err == nil {
 		t.Errorf("empty script name should be not allowed and throw an error")
 	}
@@ -164,10 +166,10 @@ func TestSchemaScriptMapper_GetByID_Happy(t *testing.T) {
 
 	id := int64(203)
 
-	mockDb := store_mock.NewMockDatabaseConnector(ctrl)
-	mockDb.EXPECT().Get(gomock.Any(), gomock.Any(), id).Return(nil)
+	mockDB := store_mock.NewMockDatabaseConnector(ctrl)
+	mockDB.EXPECT().Get(gomock.Any(), gomock.Any(), id).Return(nil)
 
-	mapper := NewSchemaScriptMapper(mockDb)
+	mapper := store.NewSchemaScriptMapper(mockDB)
 
 	_, err := mapper.GetByID(id)
 	if err != nil {
@@ -176,7 +178,7 @@ func TestSchemaScriptMapper_GetByID_Happy(t *testing.T) {
 }
 
 func TestSchemaScriptMapper_GetByID_Unhappy_ID(t *testing.T) {
-	tcs := []struct {
+	testCases := []struct {
 		name string
 		id   int64
 	}{
@@ -190,15 +192,16 @@ func TestSchemaScriptMapper_GetByID_Unhappy_ID(t *testing.T) {
 		},
 	}
 
-	for _, tc := range tcs {
-		t.Run(tc.name, func(t *testing.T) {
+	for _, testCase := range testCases {
+		id := testCase.id
+		t.Run(testCase.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 
-			mockDb := store_mock.NewMockDatabaseConnector(ctrl)
-			mockDb.EXPECT().Select(gomock.Any(), gomock.Any()).Times(0)
+			mockDB := store_mock.NewMockDatabaseConnector(ctrl)
+			mockDB.EXPECT().Select(gomock.Any(), gomock.Any()).Times(0)
 
-			mapper := NewSchemaScriptMapper(mockDb)
-			res, err := mapper.GetByID(tc.id)
+			mapper := store.NewSchemaScriptMapper(mockDB)
+			res, err := mapper.GetByID(id)
 			if err == nil {
 				t.Errorf("get entry with zero or negative id should cause an error")
 			}
@@ -217,10 +220,10 @@ func TestSchemaScriptMapper_GetByID_Unhappy_SelectError(t *testing.T) {
 
 	id := int64(666)
 
-	mockDb := store_mock.NewMockDatabaseConnector(ctrl)
-	mockDb.EXPECT().Get(gomock.Any(), gomock.Any(), id).Return(errors.New("select failed"))
+	mockDB := store_mock.NewMockDatabaseConnector(ctrl)
+	mockDB.EXPECT().Get(gomock.Any(), gomock.Any(), id).Return(errors.New("select failed")) // nolint: goerr113
 
-	mapper := NewSchemaScriptMapper(mockDb)
+	mapper := store.NewSchemaScriptMapper(mockDB)
 
 	res, err := mapper.GetByID(id)
 	if err == nil {
@@ -236,11 +239,11 @@ func TestSchemaScriptMapper_GetAll_Happy(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockDb := store_mock.NewMockDatabaseConnector(ctrl)
+	mockDB := store_mock.NewMockDatabaseConnector(ctrl)
 	empty := make([]interface{}, 0)
-	mockDb.EXPECT().Select(gomock.Any(), gomock.Any(), gomock.Eq(empty))
+	mockDB.EXPECT().Select(gomock.Any(), gomock.Any(), gomock.Eq(empty))
 
-	mapper := NewSchemaScriptMapper(mockDb)
+	mapper := store.NewSchemaScriptMapper(mockDB)
 
 	_, err := mapper.GetAll()
 	if err != nil {
@@ -252,11 +255,13 @@ func TestSchemaScriptMapper_GetAll_Unhappy(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockDb := store_mock.NewMockDatabaseConnector(ctrl)
+	mockDB := store_mock.NewMockDatabaseConnector(ctrl)
 	empty := make([]interface{}, 0)
-	mockDb.EXPECT().Select(gomock.Any(), gomock.Any(), gomock.Eq(empty)).Return(errors.New("select failed"))
+	mockDB.EXPECT().
+		Select(gomock.Any(), gomock.Any(), gomock.Eq(empty)).
+		Return(errors.New("select failed")) // nolint: goerr113
 
-	mapper := NewSchemaScriptMapper(mockDb)
+	mapper := store.NewSchemaScriptMapper(mockDB)
 
 	res, err := mapper.GetAll()
 	if err == nil {

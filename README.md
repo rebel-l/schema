@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/rebel-l/schema.svg?branch=master)](https://travis-ci.org/rebel-l/schema) 
+[![Build Status](https://travis-ci.com/rebel-l/schema.svg?branch=master)](https://travis-ci.com/rebel-l/schema) 
 [![codecov](https://codecov.io/gh/rebel-l/schema/branch/master/graph/badge.svg)](https://codecov.io/gh/rebel-l/schema)
 [![Go Report Card](https://goreportcard.com/badge/github.com/rebel-l/schema)](https://goreportcard.com/report/github.com/rebel-l/schema)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

@@ -16,7 +16,7 @@ import (
 	_ "github.com/mattn/go-sqlite3" // sqlite3 driver is needed
 )
 
-// GetDB provides a database connection for integration tests
+// GetDB provides a database connection for integration tests.
 func GetDB(dbFile string) (store.DatabaseConnector, error) {
 	if osutils.FileOrPathExists(dbFile) {
 		err := os.Remove(dbFile)
@@ -35,7 +35,7 @@ func GetDB(dbFile string) (store.DatabaseConnector, error) {
 	return db, err
 }
 
-// InitDB provides a database connection for integration tests and initialises the database
+// InitDB provides a database connection for integration tests and initialises the database.
 func InitDB(dbFile string) (store.DatabaseConnector, error) {
 	db, err := GetDB(dbFile)
 	if err != nil {
@@ -48,7 +48,7 @@ func InitDB(dbFile string) (store.DatabaseConnector, error) {
 	return db, err
 }
 
-// ShutdownDB closes database connection for integration tests
+// ShutdownDB closes database connection for integration tests.
 func ShutdownDB(db io.Closer, t *testing.T) {
 	if err := db.Close(); err != nil {
 		t.Fatalf("failed to close database: %s", err)

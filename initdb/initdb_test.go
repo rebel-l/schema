@@ -72,18 +72,21 @@ func TestInitDB_ApplyScript_Integration_Unhappy(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
+		dbErrorMsg := testCase.dbErrorMsg
+		scriptName := testCase.scriptName
+		expected := testCase.expected
 		t.Run(testCase.name, func(t *testing.T) {
-			ctrl, mockDB := getMockDB(t, testCase.dbErrorMsg)
+			ctrl, mockDB := getMockDB(t, dbErrorMsg)
 			defer ctrl.Finish()
 
 			in := initdb.New(mockDB)
-			err := in.ApplyScript(testCase.scriptName)
+			err := in.ApplyScript(scriptName)
 			if err == nil {
 				t.Error("Expected that error is returned")
 			}
 
-			if err != nil && !strings.Contains(err.Error(), testCase.expected) {
-				t.Errorf("Expected error message '%s' but got '%s'", testCase.expected, err)
+			if err != nil && !strings.Contains(err.Error(), expected) {
+				t.Errorf("Expected error message '%s' but got '%s'", expected, err)
 			}
 		})
 	}
@@ -143,18 +146,21 @@ func TestInitDB_RevertScript_Integration_Unhappy(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
+		dbErrorMsg := testCase.dbErrorMsg
+		scriptName := testCase.scriptName
+		expected := testCase.expected
 		t.Run(testCase.name, func(t *testing.T) {
-			ctrl, mockDB := getMockDB(t, testCase.dbErrorMsg)
+			ctrl, mockDB := getMockDB(t, dbErrorMsg)
 			defer ctrl.Finish()
 
 			in := initdb.New(mockDB)
-			err := in.RevertScript(testCase.scriptName)
+			err := in.RevertScript(scriptName)
 			if err == nil {
 				t.Error("Expected that error is returned")
 			}
 
-			if err != nil && !strings.Contains(err.Error(), testCase.expected) {
-				t.Errorf("Expected error message '%s' but got '%s'", testCase.expected, err)
+			if err != nil && !strings.Contains(err.Error(), expected) {
+				t.Errorf("Expected error message '%s' but got '%s'", expected, err)
 			}
 		})
 	}
@@ -165,7 +171,7 @@ func getMockDB(t *testing.T, errorMsg string) (*gomock.Controller, *store_mock.M
 	mockDB := store_mock.NewMockDatabaseConnector(ctrl)
 
 	if errorMsg != "" {
-		mockDB.EXPECT().Exec(gomock.Any()).Return(nil, errors.New("something happened"))
+		mockDB.EXPECT().Exec(gomock.Any()).Return(nil, errors.New("something happened")) // nolint: goerr113
 	}
 
 	return ctrl, mockDB
@@ -198,7 +204,7 @@ func TestInitDB_Init_Unhappy(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockDB := store_mock.NewMockDatabaseConnector(ctrl)
-	mockDB.EXPECT().Exec(gomock.Any()).Return(nil, errors.New("something happened"))
+	mockDB.EXPECT().Exec(gomock.Any()).Return(nil, errors.New("something happened")) // nolint: goerr113
 
 	in := initdb.New(mockDB)
 	if err := in.Init(); err == nil {
@@ -268,7 +274,7 @@ func TestInitDB_ReInit_Unhappy(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockDB := store_mock.NewMockDatabaseConnector(ctrl)
-	mockDB.EXPECT().Exec(gomock.Any()).Return(nil, errors.New("something happened"))
+	mockDB.EXPECT().Exec(gomock.Any()).Return(nil, errors.New("something happened")) // nolint: goerr113
 
 	in := initdb.New(mockDB)
 	if err := in.ReInit(); err == nil {

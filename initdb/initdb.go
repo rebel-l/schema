@@ -8,19 +8,19 @@ import (
 	"github.com/rebel-l/schema/store"
 )
 
-// InitDB provides functionality to initialize the database
+// InitDB provides functionality to initialize the database.
 type InitDB struct {
 	db store.DatabaseConnector
 }
 
-// New returns an InitDB struct
+// New returns an InitDB struct.
 func New(db store.DatabaseConnector) *InitDB {
 	return &InitDB{
 		db: db,
 	}
 }
 
-// ApplyScript appliers a script to the database
+// ApplyScript appliers a script to the database.
 func (i *InitDB) ApplyScript(fileName string) error {
 	sqlScript, err := sqlfile.Read(fileName, sqlfile.CommandUpgrade)
 	if err != nil {
@@ -34,7 +34,7 @@ func (i *InitDB) ApplyScript(fileName string) error {
 	return nil
 }
 
-// RevertScript reverts a script from the database
+// RevertScript reverts a script from the database.
 func (i *InitDB) RevertScript(fileName string) error {
 	sqlScript, err := sqlfile.Read(fileName, sqlfile.CommandDowngrade)
 	if err != nil {
@@ -48,7 +48,7 @@ func (i *InitDB) RevertScript(fileName string) error {
 	return nil
 }
 
-// Init initializes the schema database
+// Init initializes the schema database.
 func (i *InitDB) Init() error {
 	scripts := []string{
 		`CREATE TABLE IF NOT EXISTS schema_script (
@@ -70,7 +70,7 @@ func (i *InitDB) Init() error {
 	return nil
 }
 
-// ReInit drops created tables and execute Init() again
+// ReInit drops created tables and execute Init() again.
 func (i *InitDB) ReInit() error {
 	q := `DROP TABLE IF EXISTS %s;`
 	scripts := []string{
