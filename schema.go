@@ -4,7 +4,6 @@ package schema
 //go:generate mockgen -destination=mocks/schema_mock/schema_mock.go -package=schema_mock github.com/rebel-l/schema Applier,Scripter
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/rebel-l/schema/bar"
@@ -95,12 +94,12 @@ func (s *Schema) Upgrade(path string, version string) error {
 		}
 
 		if err = s.Applier.ApplyScript(f); err != nil {
-			msg := fmt.Sprintf("failed to execute script %s: %s", f, err)
+			msg := fmt.Errorf("failed to execute script %s: %w", f, err)
 			if err := s.Scripter.Add(store.NewSchemaScriptError(f, version, err.Error())); err != nil {
-				msg = fmt.Sprintf("original error: %s, following error: %s", msg, err)
+				msg = fmt.Errorf("original error: %v, following error: %w", msg, err)
 			}
 
-			return errors.New(msg)
+			return msg
 		}
 
 		if err = s.Scripter.Add(store.NewSchemaScriptSuccess(f, version)); err != nil {

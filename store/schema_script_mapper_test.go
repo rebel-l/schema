@@ -73,7 +73,7 @@ func TestSchemaScriptMapper_Add_Unhappy_InsertError(t *testing.T) {
 			script.Status,
 			script.ErrorMsg,
 			script.AppVersion,
-		).Return(mockRes, errors.New("insert failed"))
+		).Return(mockRes, errors.New("insert failed")) // nolint: goerr113
 
 	mapper := store.NewSchemaScriptMapper(mockDB)
 	if err := mapper.Add(script); err == nil {
@@ -88,7 +88,7 @@ func TestSchemaScriptMapper_Add_Unhappy_LastInsertError(t *testing.T) {
 	script := store.NewSchemaScriptSuccess("my_sql_script.sql", "")
 
 	mockRes := mocks.NewMockResult(ctrl)
-	mockRes.EXPECT().LastInsertId().Return(int64(0), errors.New("last insert failed"))
+	mockRes.EXPECT().LastInsertId().Return(int64(0), errors.New("last insert failed")) // nolint: goerr113
 
 	mockDB := store_mock.NewMockDatabaseConnector(ctrl)
 	mockDB.EXPECT().
@@ -139,7 +139,7 @@ func TestSchemaScriptMapper_Remove_Unhappy_DeleteError(t *testing.T) {
 	mockDB := store_mock.NewMockDatabaseConnector(ctrl)
 	mockDB.EXPECT().
 		Exec(gomock.Any(), scriptName).
-		Return(mockRes, errors.New("delete failed"))
+		Return(mockRes, errors.New("delete failed")) // nolint: goerr113
 
 	mapper := store.NewSchemaScriptMapper(mockDB)
 	if err := mapper.Remove(scriptName); err == nil {
@@ -220,7 +220,7 @@ func TestSchemaScriptMapper_GetByID_Unhappy_SelectError(t *testing.T) {
 	id := int64(666)
 
 	mockDB := store_mock.NewMockDatabaseConnector(ctrl)
-	mockDB.EXPECT().Get(gomock.Any(), gomock.Any(), id).Return(errors.New("select failed"))
+	mockDB.EXPECT().Get(gomock.Any(), gomock.Any(), id).Return(errors.New("select failed")) // nolint: goerr113
 
 	mapper := store.NewSchemaScriptMapper(mockDB)
 
@@ -256,7 +256,9 @@ func TestSchemaScriptMapper_GetAll_Unhappy(t *testing.T) {
 
 	mockDB := store_mock.NewMockDatabaseConnector(ctrl)
 	empty := make([]interface{}, 0)
-	mockDB.EXPECT().Select(gomock.Any(), gomock.Any(), gomock.Eq(empty)).Return(errors.New("select failed"))
+	mockDB.EXPECT().
+		Select(gomock.Any(), gomock.Any(), gomock.Eq(empty)).
+		Return(errors.New("select failed")) // nolint: goerr113
 
 	mapper := store.NewSchemaScriptMapper(mockDB)
 
